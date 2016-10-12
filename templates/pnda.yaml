@@ -56,6 +56,42 @@ parameters:
     description: NTP servers
     type: string
     default: ''
+  package_repository_fs_type:
+    description: Package repository FS type
+    type: string
+    default: ''
+  package_repository_fs_location_path:
+    description: Package repository FS location path
+    type: string
+    default: ''
+  package_repository_sshfs_user:
+    description: Package repository SSH FS user
+    type: string
+    default: ''
+  package_repository_sshfs_host:
+    description: Package repository SSH FS host
+    type: string
+    default: ''
+  package_repository_sshfs_path:
+    description: Package repository SSH FS path
+    type: string
+    default: ''
+  package_repository_sshfs_key:
+    description: Package repository SSH FS key
+    type: string
+    default: ''
+  S3_ACCESS_KEY_ID:
+    description: AWS S3 access key id
+    type: string
+    default: ''
+  S3_SECRET_ACCESS_KEY:
+    description: AWS S3 secret access key id
+    type: string
+    default: ''
+  AWS_REGION:
+    description: AWS region
+    type: string
+    default: ''
 
   keystone_user:
     type: string
@@ -96,8 +132,15 @@ parameters:
     default: ''
     description: |
       uri to the platform-salt upstream git repository
+  signal_transport:
+    type: string
+    default: TEMP_URL_SIGNAL
+  software_config_transport:
+    type: string
+    default: POLL_TEMP_URL
 
 resources:
+{%if create_network is equalto 1 %}
   Key:
     type: OS::Nova::KeyPair
     properties:
@@ -181,6 +224,7 @@ resources:
       fixed_ips:
         - subnet_id: { get_resource: private_subnet }
       security_groups: [{ get_resource: saltmaster_sec_group }, { get_resource: PndaSecGroup }]
+{% endif %}
   install_config:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -189,7 +233,7 @@ resources:
         - name: result
       config:
         str_replace:
-          template: {get_file: scripts/saltmaster_install.sh }
+          template: { get_file: scripts/saltmaster_install.sh }
           params:
             $git_private_key$: { get_file: deploy }
             $git_branch$: { get_param: GitBranch }
@@ -197,6 +241,16 @@ resources:
             $cloudera_mirror$: { get_param: ClouderaParcelsMirror }
             $anaconda_mirror$: { get_param: AnacondaParcelsMirror }
             $ntp_servers$: { get_param: NtpServers }
+            $package_repository_fs_type$ : { get_param: package_repository_fs_type }
+            $package_repository_fs_location_path$: { get_param: package_repository_fs_location_path }
+            $package_repository_sshfs_user$: { get_param: package_repository_sshfs_user }
+            $package_repository_sshfs_host$: { get_param: package_repository_sshfs_host }
+            $package_repository_sshfs_path$: { get_param: package_repository_sshfs_path }
+            $package_repository_sshfs_key$: { get_param: package_repository_sshfs_key }
+            $package_repository_sshfs_key_file$: { get_file: pr_key }
+            $S3_ACCESS_KEY_ID$: { get_param: S3_ACCESS_KEY_ID }
+            $S3_SECRET_ACCESS_KEY$: { get_param: S3_SECRET_ACCESS_KEY }
+            $AWS_REGION$: { get_param: AWS_REGION }
             $keystone_user$: { get_param: keystone_user }
             $keystone_password$: { get_param: keystone_password }
             $keystone_tenant$: { get_param: keystone_tenant }
@@ -302,10 +356,12 @@ resources:
             deployment_id: { get_param: DeploymentID }
 
 outputs:
+{%if create_network is equalto 1 %}
   private_key:
     value: { get_attr: [Key, private_key]}
     description: |
       The dynamically created keypair's private key value
+{% endif %}
   DeploymentID:
     value: { get_param: DeploymentID }
     description: |

@@ -53,7 +53,23 @@ if [ -b $volume_dev$ ]; then
 EOF
 fi
 
-DISKS="vdc vdd vde"
+PRDISK="$volume_pr$"
+if [[ "$roles$" =~ "package_repository" ]]; then
+  if [ -b /dev/$volume_pr$ ]; then
+    umount /dev/$volume_pr$ || echo 'not mounted'
+    PRDISK=""
+    mkfs.xfs /dev/$volume_pr$
+    mkdir -p $package_repository_fs_location_path$
+    cat >> /etc/fstab <<EOF
+    /dev/$volume_pr$  $package_repository_fs_location_path$ xfs defaults  0 0
+EOF
+  fi
+else
+  PRDISK=${PRDISK/\/dev\//}
+fi    
+
+
+DISKS="vdd vde $PRDISK"
 DISK_IDX=0
 for DISK in $DISKS; do
    echo $DISK
