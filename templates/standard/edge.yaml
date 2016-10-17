@@ -29,7 +29,6 @@ parameters:
     type: string
   pnda_flavor:
     type: string
-    default: standard
   logvolume_size:
     type: number
     default: 250

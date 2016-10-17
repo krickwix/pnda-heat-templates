@@ -21,20 +21,20 @@ pnda:
 pnda_cluster: $pnda_cluster$
 EOF
 
-if [ "$cloudera_role$" != "$" ]; then
+if [ "x$cloudera_role$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 cloudera:
   role: $cloudera_role$
 EOF
 fi
 
-if [ "$brokerid$" != "$" ]; then
+if [ "x$brokerid$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 broker_id: $brokerid$
 EOF
 fi
 
-if [ "$roles$" != "$" ]; then
+if [ "x$roles$" != "x$" ]; then
 cat >> /etc/salt/grains <<EOF
 `printf "%b" "$a"`
 EOF
@@ -45,7 +45,7 @@ service salt-minion restart
 apt-get -y install xfsprogs
 
 if [ -b $volume_dev$ ]; then
-  umount $volume_dev$ || echo 'not mounted'  
+  umount $volume_dev$ || echo 'not mounted'
   mkfs.xfs $volume_dev$
   mkdir -p /var/log/pnda
   cat >> /etc/fstab <<EOF
@@ -66,7 +66,7 @@ EOF
   fi
 else
   PRDISK=${PRDISK/\/dev\//}
-fi    
+fi
 
 
 DISKS="vdd vde $PRDISK"
@@ -86,4 +86,3 @@ for DISK in $DISKS; do
 done
 cat /etc/fstab
 mount -a
-
