@@ -88,7 +88,7 @@ def get_args():
     parser.add_argument('-o','--opentsdb-nodes', type=int, help='How many Open TSDB nodes for the hadoop cluster')
     parser.add_argument('-k','--kafka-nodes', type=int, help='How many kafka nodes for the databus cluster')
     parser.add_argument('-z','--zk-nodes', type=int, help='How many zookeeper nodes for the databus cluster')
-    parser.add_argument('-f','--flavor', help='PNDA flavor: e.g. "standard"', choices=['pico', 'standard', 'bmstandard'])
+    parser.add_argument('-f','--flavor', help='PNDA flavor: e.g. "standard"', choices=['femto', 'pico', 'standard', 'bmstandard'])
     parser.add_argument('-b','--branch', help='Git branch to use (defaults to master)')
     parser.add_argument('-s','--keypair', help='keypair name for ssh to the bastion server')
     parser.add_argument('-v','--verbose', help='Be more verbose')
@@ -181,6 +181,8 @@ def setup_flavor_templates(flavor, cname, is_bare, fs_type):
     shutil.copy('../../deploy', './')
     if os.path.isfile('../../pr_key'):
         shutil.copy('../../pr_key', './')
+    if os.path.isdir('../../templates/%s/scripts' % flavor):
+        os.system('cp -rf ../../templates/%s/scripts/* ./scripts/' % flavor)
 
 def create_cluster(args):
 
@@ -224,7 +226,7 @@ def create_cluster(args):
             kafkanodes = 2
         if zknodes == None:
             zknodes = 3
-    elif flavor == 'pico':
+    elif (flavor == 'pico') or (flavor == 'femto'):
         if datanodes == None:
             datanodes = 1
         if tsdbnodes == None:

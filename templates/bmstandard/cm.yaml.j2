@@ -1,23 +1,23 @@
-# Definition for the cloudera manager instance type
-# Specifies which bootstrap script to run to set up this instance type and which roles
-# to apply to this instance type
-
 heat_template_version: 2014-10-16
 
 parameters:
   Flavor:
-    description: Flavor of the cloudera manager server
+    description: Flavor of the cm server
     type: string
-    default: m1.xlarge
+    default: m1.small
   KeyName:
     description: Name of an existing ssh keypair
     type: string
+{%if create_network is equalto 1 %}
   PrivateNet:
     description: Private network for pnda deployment
     type: string
   PrivateSubnet:
     description: Private network for pnda deployment
     type: string
+  pnda_secgroup:
+    type: string
+{%endif%}
   Image:
     type: string
   name:
@@ -26,26 +26,27 @@ parameters:
     type: string
   cluster_name:
     type: string
-  pnda_secgroup:
-    type: string
   pnda_flavor:
     type: string
+{%if create_volumes is equalto 1 %}
   logvolume_size:
     type: number
     default: 500
   log_mountpoint:
     type: string
     default: /dev/vdb
+{%endif%}
   signal_transport:
     type: string
   software_config_transport:
     type: string
 
 resources:
+{%if create_network is equalto 1 %}
   sec_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      description: CM SecurityGroup
+      description: cm SecurityGroup
       name:
         str_replace:
           template:
@@ -57,8 +58,8 @@ resources:
           protocol: icmp
         - remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
-          port_range_min: 7180
-          port_range_max: 7180
+          port_range_min: 22
+          port_range_max: 22
   port:
     type: OS::Neutron::Port
     properties:
@@ -66,6 +67,7 @@ resources:
       fixed_ips:
         - subnet_id: { get_param: PrivateSubnet }
       security_groups: [{ get_resource: sec_group }, { get_param: pnda_secgroup }]
+{%endif%}
   install_config:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -77,12 +79,36 @@ resources:
             $flavor$: { get_param: pnda_flavor }
             $master_ip$: { get_param: SaltmasterIP }
             $pnda_cluster$: { get_param: cluster_name }
+{%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
-            $roles$: 'cloudera_manager,platform_testing_cdh,mysql_connector'
+{%endif%}
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD:templates/bmstandard/cm.yaml.j2
+            $roles$: 'cloudera_manager platform_testing_cdh platform_testing_general mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
+=======
+            $roles$: 'cloudera_manager platform_testing_cdh mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
+>>>>>>> 8890838... dev: jinjaize templates for bmstandard flavor:templates/bmstandard/cm.yaml.j2
+=======
+            $roles$: 'cloudera_manager platform_testing_cdh platform_testing_general mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
+>>>>>>> 0a85452... dev: adding missing platform_testing_general role
+=======
+            $roles$: 'cloudera_manager platform_testing_cdh mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
+>>>>>>> 2a73231... dev: jinjaize templates for bmstandard flavor
+=======
+            $roles$: 'cloudera_manager platform_testing_cdh platform_testing_general mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
+>>>>>>> 25cda50... dev: adding missing platform_testing_general role
+=======
+            $roles$: 'cloudera_manager,platform_testing_cdh,platform_testing_general,mysql_connector,cloudera_namenode,mysql_connector,elk,logserver,opentsdb,grafana,kibana_dashboard'
+>>>>>>> e4e111a... comma separated roles
             $cloudera_role$: 'CM'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
+{%if create_volumes is equalto 1 %}
     depends_on: [ logvolume_attachment ]
+{%endif%}
     properties:
       signal_transport: { get_param: signal_transport }
       config:
@@ -90,11 +116,12 @@ resources:
       server:
         get_resource: server
 
+{%if create_volumes is equalto 1 %}
   logvolume:
     type: OS::Cinder::Volume
     properties:
       size: { get_param: logvolume_size }
-      description: Volume for cloudera manager logs
+      description: Volume for cm logs
 
   logvolume_attachment:
     type: OS::Cinder::VolumeAttachment
@@ -102,7 +129,7 @@ resources:
       volume_id: { get_resource: logvolume }
       instance_uuid: { get_resource: server }
       mountpoint: { get_param: log_mountpoint }
-
+{%endif%}
 
   server:
     type: OS::Nova::Server
@@ -111,8 +138,10 @@ resources:
       image: { get_param: Image }
       flavor: { get_param: Flavor}
       key_name: { get_param: KeyName }
+{%if create_network is equalto 1 %}
       networks:
         - port: { get_resource: port }
+{%endif%}
       software_config_transport: { get_param: software_config_transport }
       user_data_format: SOFTWARE_CONFIG
       config_drive: True

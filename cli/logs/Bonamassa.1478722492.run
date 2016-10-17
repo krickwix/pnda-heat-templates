@@ -1,0 +1,1 @@
+{"cmdline": ["./heat_cli.py", "-e", "Bonamassa", "-f", "femto", "--bare", "true", "-s", "fandrieu", "-b", "PNDA-2271", "create"]}

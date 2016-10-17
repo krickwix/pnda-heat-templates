@@ -1,17 +1,12 @@
 #!/bin/bash -v
 
-# This script runs on all instances except the saltmaster
-# It installs a salt minion and mounts the disks
-
 set -e
-
-ROLES=$roles$
+export roles="$roles$"
 
 cat >> /etc/hosts <<EOF
 $master_ip$ saltmaster salt
 EOF
 
-# Install a salt minion
 export DEBIAN_FRONTEND=noninteractive
 wget -O install_salt.sh https://bootstrap.saltstack.com
 sh install_salt.sh -D -U stable 2015.8.11
@@ -19,38 +14,44 @@ hostname=`hostname` && echo "id: $hostname" > /etc/salt/minion && unset hostname
 echo "log_level: debug" >> /etc/salt/minion
 echo "log_level_logfile: debug" >> /etc/salt/minion
 
-# Set up the grains
+a="roles:\n";for i in $roles; do a="$a  - $i\n";done;echo $a
 cat > /etc/salt/grains <<EOF
 pnda:
   flavor: $flavor$
 pnda_cluster: $pnda_cluster$
 EOF
 
-if [ "$cloudera_role$" != "$" ]; then
+if [ "x$cloudera_role$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 cloudera:
   role: $cloudera_role$
 EOF
 fi
 
-if [ "$brokerid$" != "$" ]; then
+if [ "x$brokerid$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 broker_id: $brokerid$
 EOF
 fi
 
-# The roles grains determine what software is installed
-# on this instance by platform-salt scripts
-if [ "x${ROLES}" != "x" ]; then
+if [ "x$roles$" != "x$" ]; then
 cat >> /etc/salt/grains <<EOF
-roles: [${ROLES}]
+`printf "%b" "$a"`
 EOF
 fi
 
 service salt-minion restart
 
-# Mount the disks
 apt-get -y install xfsprogs
+
+if [ -b "/dev/sdb" ]; then
+  umount /dev/sdb || echo "not mounted"
+  mkfs.xfs -f /dev/sdb
+  mkdir -p /data0
+  cat >> /etc/fstab <<EOF
+  /dev/sdb  /data0 xfs defaults  0 0
+  EOF
+fi
 
 if [ -b $volume_dev$ ]; then
   umount $volume_dev$ || echo 'not mounted'
@@ -61,10 +62,8 @@ if [ -b $volume_dev$ ]; then
 EOF
 fi
 
-# If a sshfs disk for application packages is required
-# then mount it for that purpose
 PRDISK="$volume_pr$"
-if [[ ",${ROLES}," = *",package_repository,"* ]]; then
+if [[ "$roles$" =~ "package_repository" ]]; then
   if [ -b /dev/$volume_pr$ ]; then
     umount /dev/$volume_pr$ || echo 'not mounted'
     PRDISK=""
@@ -78,8 +77,6 @@ else
   PRDISK=${PRDISK/\/dev\//}
 fi
 
-# Mount the rest of the disks as /dataN
-# These can be used for additional HDFS space if HDFS is configured to use them
 DISKS="vdd vde $PRDISK"
 DISK_IDX=0
 for DISK in $DISKS; do

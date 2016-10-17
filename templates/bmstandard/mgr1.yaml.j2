@@ -8,12 +8,16 @@ parameters:
   KeyName:
     description: Name of an existing ssh keypair
     type: string
+{%if create_network is equalto 1 %}
   PrivateNet:
     description: Private network for pnda deployment
     type: string
   PrivateSubnet:
     description: Private network for pnda deployment
     type: string
+  pnda_secgroup:
+    type: string
+{%endif%}
   Image:
     type: string
   name:
@@ -22,16 +26,16 @@ parameters:
     type: string
   cluster_name:
     type: string
-  pnda_secgroup:
-    type: string
   pnda_flavor:
     type: string
+{%if create_volumes is equalto 1 %}
   logvolume_size:
     type: number
     default: 250
   log_mountpoint:
     type: string
     default: /dev/vdb
+{%endif%}
   signal_transport:
     type: string
   software_config_transport:
@@ -39,6 +43,7 @@ parameters:
 
 
 resources:
+{%if create_network is equalto 1 %}
   sec_group:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -59,6 +64,7 @@ resources:
       fixed_ips:
         - subnet_id: { get_param: PrivateSubnet }
       security_groups: [{ get_resource: sec_group }, { get_param: pnda_secgroup }]
+{%endif%}
   install_config:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -70,12 +76,16 @@ resources:
             $master_ip$: { get_param: SaltmasterIP }
             $pnda_cluster$: { get_param: cluster_name }
             $flavor$: { get_param: pnda_flavor }
+{%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
-            $roles$: 'cloudera_namenode mysql_connector'
+{%endif%}
+            $roles$: 'cloudera_namenode,mysql_connector'
             $cloudera_role$: 'MGR01'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
+{%if create_volumes is equalto 1 %}
     depends_on: [ logvolume_attachment ]
+{%endif%}
     properties:
       signal_transport: { get_param: signal_transport }
       config:
@@ -83,6 +93,7 @@ resources:
       server:
         get_resource: server
 
+{%if create_volumes is equalto 1 %}
   logvolume:
     type: OS::Cinder::Volume
     properties:
@@ -95,7 +106,7 @@ resources:
       volume_id: { get_resource: logvolume }
       instance_uuid: { get_resource: server }
       mountpoint: { get_param: log_mountpoint }
-
+{%endif%}
 
   server:
     type: OS::Nova::Server
@@ -104,8 +115,10 @@ resources:
       image: { get_param: Image }
       flavor: { get_param: Flavor}
       key_name: { get_param: KeyName }
+{%if create_network is equalto 1 %}
       networks:
         - port: { get_resource: port }
+{%endif%}
       software_config_transport: { get_param: software_config_transport }
       user_data_format: SOFTWARE_CONFIG
       config_drive: True

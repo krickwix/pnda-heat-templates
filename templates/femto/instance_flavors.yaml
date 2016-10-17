@@ -8,4 +8,4 @@ parameter_defaults:
   BastionFlavor: pico-bastion
   SaltmasterFlavor: pnda-micro
   DatanodeVolumeSize: 35
-  PndaFlavor: pico
+  PndaFlavor: femto

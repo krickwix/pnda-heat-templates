@@ -1,18 +1,11 @@
 parameter_defaults:
-  CMFlavor: pnda-cm
-  Manager1Flavor: pnda-manager-large
-  Manager2Flavor: pnda-manager-large
-  Manager3Flavor: pnda-manager-large
-  Manager4Flavor: pnda-manager-large
-  LogserverFlavor: pnda-logserver
-  EdgeFlavor: pnda-edge
-  JupyterFlavor: pnda-jupyter
-  OpentsdbFlavor: pnda-opentsdb
-  ToolsFlavor: pnda-tools
-  ZookeeperFlavor: pnda-zookeeper
-  KafkaFlavor: pnda-kafka
-  DatanodeFlavor: pnda-datanode
-  BastionFlavor: pnda-micro
-  SaltmasterFlavor: pnda-micro
+  CMFlavor: p.cm
+  Manager1Flavor: p.mgr
+  Manager2Flavor: p.mgr
+  EdgeFlavor: p.edge
+  ZookeeperFlavor: p.zookeeper
+  KafkaFlavor: p.kafka
+  DatanodeFlavor: p.dn
+  SaltmasterFlavor: p.master
   DatanodeVolumeSize: 1024
-  PndaFlavor: standard
+  PndaFlavor: bmstandard
