@@ -1,12 +1,8 @@
-# Definition for the logserver instance type
-# Specifies which bootstrap script to run to set up this instance type and which roles
-# to apply to this instance type
-
 heat_template_version: 2014-10-16
 
 parameters:
   Flavor:
-    description: Flavor of the logserver server
+    description: Flavor of the cm server
     type: string
     default: m1.small
   KeyName:
@@ -45,11 +41,11 @@ resources:
   sec_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      description: Logserver SecurityGroup
+      description: cm SecurityGroup
       name:
         str_replace:
           template:
-            cname-logserver
+            cname-cdh-cm
           params:
             cname: { get_param: cluster_name }
       rules:
@@ -78,9 +74,8 @@ resources:
             $master_ip$: { get_param: SaltmasterIP }
             $pnda_cluster$: { get_param: cluster_name }
             $volume_dev$: { get_param: log_mountpoint }
-            $roles$: 'elk,logserver,kibana_dashboard'
-            $cloudera_role$: ''
-
+            $roles$: 'cloudera_manager platform_testing_cdh mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
+            $cloudera_role$: 'CM'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
     depends_on: [ logvolume_attachment ]
@@ -95,7 +90,7 @@ resources:
     type: OS::Cinder::Volume
     properties:
       size: { get_param: logvolume_size }
-      description: Volume for logserver logs
+      description: Volume for cm logs
 
   logvolume_attachment:
     type: OS::Cinder::VolumeAttachment

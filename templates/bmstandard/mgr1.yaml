@@ -1,14 +1,10 @@
-# Definition for the logserver instance type
-# Specifies which bootstrap script to run to set up this instance type and which roles
-# to apply to this instance type
-
 heat_template_version: 2014-10-16
 
 parameters:
   Flavor:
-    description: Flavor of the logserver server
+    description: Flavor of the manager1 server
     type: string
-    default: m1.small
+    default: m1.xlarge
   KeyName:
     description: Name of an existing ssh keypair
     type: string
@@ -32,7 +28,7 @@ parameters:
     type: string
   logvolume_size:
     type: number
-    default: 500
+    default: 250
   log_mountpoint:
     type: string
     default: /dev/vdb
@@ -41,24 +37,21 @@ parameters:
   software_config_transport:
     type: string
 
+
 resources:
   sec_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      description: Logserver SecurityGroup
+      description: CM SecurityGroup
       name:
         str_replace:
           template:
-            cname-logserver
+            cname-cdh-mgr1
           params:
             cname: { get_param: cluster_name }
       rules:
         - remote_ip_prefix: 0.0.0.0/0
           protocol: icmp
-        - remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
   port:
     type: OS::Neutron::Port
     properties:
@@ -74,13 +67,12 @@ resources:
         str_replace:
           template: {get_file: scripts/base_install.sh }
           params:
-            $flavor$: { get_param: pnda_flavor }
             $master_ip$: { get_param: SaltmasterIP }
             $pnda_cluster$: { get_param: cluster_name }
+            $flavor$: { get_param: pnda_flavor }
             $volume_dev$: { get_param: log_mountpoint }
-            $roles$: 'elk,logserver,kibana_dashboard'
-            $cloudera_role$: ''
-
+            $roles$: 'cloudera_namenode mysql_connector'
+            $cloudera_role$: 'MGR01'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
     depends_on: [ logvolume_attachment ]
@@ -95,7 +87,7 @@ resources:
     type: OS::Cinder::Volume
     properties:
       size: { get_param: logvolume_size }
-      description: Volume for logserver logs
+      description: Volume for manager1 logs
 
   logvolume_attachment:
     type: OS::Cinder::VolumeAttachment
@@ -103,6 +95,7 @@ resources:
       volume_id: { get_resource: logvolume }
       instance_uuid: { get_resource: server }
       mountpoint: { get_param: log_mountpoint }
+
 
   server:
     type: OS::Nova::Server
