@@ -30,7 +30,6 @@ parameters:
     type: string
   pnda_flavor:
     type: string
-    default: standard
   signal_transport:
     type: string
   software_config_transport:

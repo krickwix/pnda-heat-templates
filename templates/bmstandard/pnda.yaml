@@ -1,6 +1,3 @@
-# This flavor specific pnda.yaml defines a saltmaster to run the salt commands
-# defined in the base pnda.yaml and a pnda-cluster sub stack containing the 
-# rest of the instances
 
 parameters:
   SaltmasterFlavor:
@@ -91,11 +88,8 @@ parameters:
     type: string
   signal_transport:
     type: string
-    default: TEMP_URL_SIGNAL
   software_config_transport:
     type: string
-    default: POLL_TEMP_URL
-
 
 resources:
   pnda_cluster:
@@ -133,9 +127,8 @@ resources:
       DataNodes: { get_param: DataNodes }
       OpentsdbNodes: { get_param: OpentsdbNodes }
       DatanodeVolumeSize : { get_param: DatanodeVolumeSize }
-      signal_transport: { get_param: signal_transport }
-      software_config_transport: { get_param: software_config_transport }
-
+      PndaFlavor: { get_param: PndaFlavor }
+      
   saltmaster_server:
     type: OS::Nova::Server
     depends_on: [ router, private_subnet ]

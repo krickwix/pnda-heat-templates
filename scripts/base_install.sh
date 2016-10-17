@@ -37,7 +37,7 @@ cloudera:
 EOF
 fi
 
-if [ "$brokerid$" != "$" ]; then
+if [ "x$brokerid$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 broker_id: $brokerid$
 EOF
@@ -101,4 +101,3 @@ for DISK in $DISKS; do
 done
 cat /etc/fstab
 mount -a
-
