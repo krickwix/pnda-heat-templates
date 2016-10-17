@@ -21,14 +21,14 @@ pnda:
 pnda_cluster: $pnda_cluster$
 EOF
 
-if [ "$cloudera_role$" != "$" ]; then
+if [ "x$cloudera_role$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 cloudera:
   role: $cloudera_role$
 EOF
 fi
 
-if [ "$brokerid$" != "$" ]; then
+if [ "x$brokerid$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
 broker_id: $brokerid$
 EOF
@@ -86,4 +86,3 @@ for DISK in $DISKS; do
 done
 cat /etc/fstab
 mount -a
-

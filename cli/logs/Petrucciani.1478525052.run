@@ -1,0 +1,1 @@
+{"cmdline": ["./heat_cli.py", "-e", "Petrucciani", "-f", "pico", "-b", "PNDA-2271", "-s", "fandrieu", "create"]}

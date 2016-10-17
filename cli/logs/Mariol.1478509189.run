@@ -1,0 +1,1 @@
+{"cmdline": ["./heat_cli.py", "-e", "Mariol", "-f", "bmstandard", "-b", "PNDA-2271", "-s", "fandrieu", "-bare", "true", "create"]}

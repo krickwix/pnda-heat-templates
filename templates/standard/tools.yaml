@@ -29,7 +29,6 @@ parameters:
     type: string
   pnda_flavor:
     type: string
-    default: standard
   pnda_secgroup:
     type: string
   signal_transport:

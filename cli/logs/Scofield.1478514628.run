@@ -1,0 +1,1 @@
+{"cmdline": ["./heat_cli.py", "-e", "Scofield", "-f", "standard", "-b", "PNDA-2271", "-s", "fandrieu", "create"]}

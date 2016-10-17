@@ -31,7 +31,6 @@ parameters:
     type: string
   pnda_flavor:
     type: string
-    default: standard
   logvolume_size:
     type: number
     default: 500
@@ -64,6 +63,9 @@ resources:
             $pnda_cluster$: { get_param: cluster_name }
             $volume_dev$: { get_param: log_mountpoint }
             $roles$: 'zookeeper'
+            $cloudera_role$: ''
+
+
   install_deployment:
     type: OS::Heat::SoftwareDeployment
     depends_on: [ logvolume_attachment ]
