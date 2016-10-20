@@ -164,6 +164,8 @@ def setup_flavor_templates(flavor, cname, dir, is_bare):
     shutil.copy('../../deploy', './')
     if os.path.isfile('../../pr_key'):
         shutil.copy('../../pr_key', './')
+    if os.path.isdir('../../templates/%s/scripts' % flavor):
+        os.system('cp -rf ../../templates/%s/scripts/* ./scripts/' % flavor)
 
 def create_cluster(args):
     pnda_cluster = args.pnda_cluster
