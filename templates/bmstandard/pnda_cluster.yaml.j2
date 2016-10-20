@@ -210,7 +210,8 @@ resources:
   zookeeper:
     type: OS::Heat::ResourceGroup
     properties:
-      count: { get_param: ZookeeperNodes }
+      #count: { get_param: ZookeeperNodes }
+      count: 1
       resource_def:
         type: OS::Pnda::zookeeper
         properties:
