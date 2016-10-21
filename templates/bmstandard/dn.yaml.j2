@@ -69,7 +69,7 @@ resources:
       group: script
       config:
         str_replace:
-          template: {get_file: scripts/base_install.sh }
+          template: {get_file: scripts/dn_install.sh }
           params:
             $flavor$: { get_param: pnda_flavor }
             $master_ip$: { get_param: SaltmasterIP }
