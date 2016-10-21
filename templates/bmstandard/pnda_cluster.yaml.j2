@@ -245,7 +245,7 @@ resources:
   cm:
     type: OS::Pnda::cm
     properties:
-      Flavor: { get_param: LogserverFlavor }
+      Flavor: { get_param: CMFlavor }
       Image: { get_param: image_id }
       KeyName: { get_param: KeyName }
       name:
