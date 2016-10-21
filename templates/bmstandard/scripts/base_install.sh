@@ -46,7 +46,7 @@ apt-get -y install xfsprogs
 
 if [ -b "/dev/sdb" ]; then
   umount /dev/sdb || echo "not mounted"
-  mkfs.xfs /dev/sdb
+  mkfs.xfs -f /dev/sdb
   mkdir -p /var/log/pnda
   cat >> /etc/fstab <<EOF
   /dev/sdb  /var/log/pnda xfs defaults  0 0
