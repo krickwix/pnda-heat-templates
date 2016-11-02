@@ -2,11 +2,14 @@
 
 #set -xe
 
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
 >>>>>>> kvm helpers for pico
+=======
+>>>>>>> adding baremetal directory
 openstack flavor delete pnda-micro
 openstack flavor delete pnda-zookeeper
 openstack flavor delete pico-kafka
@@ -40,6 +43,7 @@ openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boo
 openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="dn" pico-dn
 openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="mgr" pico-mgr
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 openstack flavor delete p.master
 openstack flavor delete p.tools
@@ -72,3 +76,5 @@ openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boo
 =======
 >>>>>>> kvm helpers for pico
 
+=======
+>>>>>>> adding baremetal directory

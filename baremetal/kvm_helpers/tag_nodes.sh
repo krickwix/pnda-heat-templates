@@ -35,4 +35,3 @@ for i in $(ironic node-list|grep -v UUID|grep opentsdb|awk {'print $2'});do iron
 >>>>>>> kvm helpers for pico
 
 for i in $(ironic node-list|grep -v UUID|awk {'print $2'});do ironic node-show $i|grep -A1 properties;done
-
