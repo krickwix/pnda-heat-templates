@@ -4,7 +4,7 @@
 Creating the stack user
 ```
 sudo useradd stack
-sudo passwd stack  # specify a password
+echo "cisco" | passwd stack --stdin
 echo "stack ALL=(root) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/stack
 sudo chmod 0440 /etc/sudoers.d/stack
 su - stack
@@ -53,6 +53,12 @@ store_events = false
 [auth]
 EOF
 ```
+Edit the ```undercloud.conf``` file to replace the ```undercloud_fqdn``` and the ```<provisioning_interface>``` fields. The provisioning interface is preferably the unnumbered one.
+```
+ip a
+vi ~/undercloud.conf
+```
+
 Undercloud deployment
 ```
 export DIB_YUM_REPO_CONF="/etc/yum.repos.d/delorean-deps-mitaka.repo /etc/yum.repos.d/delorean-mitaka.repo"
@@ -111,6 +117,7 @@ Second we create the pnda image
 cd
 git clone https://github.com/pndaproject/pnda-dib-elements.git
 export NODE_DIST=ubuntu
+export DIB_RELEASE=trusty
 export ELEMENTS_PATH="/usr/share/tripleo-image-elements:/usr/share/openstack-heat-templates/:/usr/share/openstack-heat-templates/software-config/elements:/usr/share/instack-undercloud:/usr/share/tripleo-puppet-elements:/home/stack/pnda-dib-elements/elements"
 export PUPPET_COMMON_ELEMENTS="\
     sysctl \
@@ -139,3 +146,91 @@ pnda_kernel_id=$(glance image-list|grep pnda-image-vmlinuz|awk {'print $2'})
 glance image-update --property ramdisk_id=$pnda_initrd_id pnda-image
 glance image-update --property kernel_id=$pnda_kernel_id pnda-image
 ```
+## Setting up a virtualized environment
+
+```
+sudo yum -y install libvirt virt-install
+cat << EOF > /etc/polkit-1/localauthority/50-local.d/50-libvirt-user-stack.pkla
+[libvirt Management Access]
+Identity=unix-user:stack
+Action=org.libvirt.unix.manage
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+EOF
+sudo usermod -aG libvirt stack
+sudo systemctl enable libvirtd
+sudo systemctl start libvirtd
+ssh-copy-id 192.168.122.1
+```
+
+```
+cd
+git clone https://github.com/krickwix/pnda-heat-templates.git
+cd pnda-heat-templates
+git checkout PNDA-2271
+cd
+```
+
+```
+sudo -i
+cd /var/lib/libvirt/images
+/home/stack/pnda-heat-templates/baremetal/kvm_helpers/create_vms.sh
+exit
+~/pnda-heat-templates/baremetal/kvm_helpers/create_json.sh
+~/pnda-heat-templates/baremetal/kvm_helpers/create_flavors.sh
+openstack baremetal import ~/instackenv.json
+openstack baremetal configure boot
+~/pnda-heat-templates/baremetal/kvm_helpers/tag_nodes.sh
+```
+**What happened here:** ```create_vms.sh```
+
+```
+openstack flavor list
+```
+
+```
+openstack baremetal list
+```
+Starting nodes introspection
+```
+openstack baremetal introspection bulk start
+
+[...]
+
+Setting nodes for introspection to manageable...
+Starting introspection of node: 3296dcfd-8417-40d1-ac49-105f2b63f5c1
+Starting introspection of node: 9bbac7d8-afc4-434d-93c0-08ea37789176
+Starting introspection of node: 978d96a6-455b-4641-a744-d2ad759552bd
+Starting introspection of node: 3f78d68d-361a-45a9-9c05-cbf0b2cf0c5c
+Starting introspection of node: cd6d0c72-d1a4-4418-9b8d-08e974d3230c
+Starting introspection of node: aadeb6e8-937b-42e2-8524-697e9dbe8dd6
+Starting introspection of node: bf840e76-c7bd-4be7-abae-10be5b4e5f15
+Starting introspection of node: 3fecd5c3-9199-48d4-900c-e4d88ebae4fc
+Starting introspection of node: 870bbdfa-6265-470f-8b0b-b75f277c96e8
+Starting introspection of node: 9e168fb2-3e3c-465e-8b82-60c0e1bd83ed
+Waiting for introspection to finish...
+Introspection for UUID 3296dcfd-8417-40d1-ac49-105f2b63f5c1 finished successfully.
+Introspection for UUID 9bbac7d8-afc4-434d-93c0-08ea37789176 finished successfully.
+Introspection for UUID 978d96a6-455b-4641-a744-d2ad759552bd finished successfully.
+Introspection for UUID cd6d0c72-d1a4-4418-9b8d-08e974d3230c finished successfully.
+Introspection for UUID aadeb6e8-937b-42e2-8524-697e9dbe8dd6 finished successfully.
+Introspection for UUID 3f78d68d-361a-45a9-9c05-cbf0b2cf0c5c finished successfully.
+Introspection for UUID 3fecd5c3-9199-48d4-900c-e4d88ebae4fc finished successfully.
+Introspection for UUID bf840e76-c7bd-4be7-abae-10be5b4e5f15 finished successfully.
+Introspection for UUID 9e168fb2-3e3c-465e-8b82-60c0e1bd83ed finished successfully.
+Introspection for UUID 870bbdfa-6265-470f-8b0b-b75f277c96e8 finished successfully.
+Setting manageable nodes to available...
+Node 3296dcfd-8417-40d1-ac49-105f2b63f5c1 has been set to available.
+Node 9bbac7d8-afc4-434d-93c0-08ea37789176 has been set to available.
+Node 978d96a6-455b-4641-a744-d2ad759552bd has been set to available.
+Node 3f78d68d-361a-45a9-9c05-cbf0b2cf0c5c has been set to available.
+Node cd6d0c72-d1a4-4418-9b8d-08e974d3230c has been set to available.
+Node aadeb6e8-937b-42e2-8524-697e9dbe8dd6 has been set to available.
+Node bf840e76-c7bd-4be7-abae-10be5b4e5f15 has been set to available.
+Node 3fecd5c3-9199-48d4-900c-e4d88ebae4fc has been set to available.
+Node 870bbdfa-6265-470f-8b0b-b75f277c96e8 has been set to available.
+Node 9e168fb2-3e3c-465e-8b82-60c0e1bd83ed has been set to available.
+Introspection completed.
+```
+

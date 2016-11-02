@@ -81,4 +81,3 @@ jq . << EOF > ~/instackenv.json
   ]
 }
 EOF
-
