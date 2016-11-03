@@ -163,6 +163,7 @@ jq . << EOF > ~/instackenv.json
       "disk": "10",
       "arch": "x86_64",
       "pm_user": "stack"
+<<<<<<< HEAD
     },
     {
       "name": "$(sed -n 12p /tmp/names.txt)",
@@ -192,6 +193,8 @@ jq . << EOF > ~/instackenv.json
       "arch": "x86_64",
       "pm_user": "stack"
 >>>>>>> adding baremetal directory
+=======
+>>>>>>> ngena
     }
   ]
 }
