@@ -226,7 +226,7 @@ resources:
   edge:
     type: OS::Pnda::edge
     properties:
-      Flavor: { get_param: CMFlavor }
+      Flavor: { get_param: EdgeFlavor }
       Image: { get_param: image_id }
       KeyName: { get_param: KeyName }
       name:
