@@ -78,6 +78,7 @@ jq . << EOF > ~/instackenv.json
       "arch": "x86_64",
       "pm_user": "stack"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     },
     {
@@ -195,6 +196,8 @@ jq . << EOF > ~/instackenv.json
 >>>>>>> adding baremetal directory
 =======
 >>>>>>> ngena
+=======
+>>>>>>> kvm helpers for pico
     }
   ]
 }
