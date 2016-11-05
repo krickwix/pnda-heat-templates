@@ -117,6 +117,7 @@ Second we create the pnda image
 cd
 git clone https://github.com/pndaproject/pnda-dib-elements.git
 export NODE_DIST=ubuntu
+export DIB_RELEASE=trusty
 export ELEMENTS_PATH="/usr/share/tripleo-image-elements:/usr/share/openstack-heat-templates/:/usr/share/openstack-heat-templates/software-config/elements:/usr/share/instack-undercloud:/usr/share/tripleo-puppet-elements:/home/stack/pnda-dib-elements/elements"
 export PUPPET_COMMON_ELEMENTS="\
     sysctl \
