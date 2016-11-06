@@ -8,4 +8,3 @@ for i in $(ironic node-list|grep -v UUID|grep dn|awk {'print $2'});do ironic nod
 for i in $(ironic node-list|grep -v UUID|grep mgr|awk {'print $2'});do ironic node-update $i add properties/capabilities=profile:mgr,boot_option:local;done
 
 for i in $(ironic node-list|grep -v UUID|awk {'print $2'});do ironic node-show $i|grep -A1 properties;done
-

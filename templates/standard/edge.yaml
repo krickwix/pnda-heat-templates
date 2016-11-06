@@ -1,3 +1,7 @@
+# Definition for the edge instance type
+# Specifies which bootstrap script to run to set up this instance type and which roles
+# to apply to this instance type
+
 heat_template_version: 2014-10-16
 
 parameters:
@@ -86,7 +90,7 @@ resources:
             $volume_dev$: { get_param: log_mountpoint }
             $volume_pr$: { get_param: pr_mountpoint }
             $package_repository_fs_location_path$: { get_param: package_repository_fs_location_path }
-            $roles$: 'cloudera_edge console_frontend console_backend_data_logger console_backend_data_manager graphite gobblin deployment_manager package_repository data_service impala-shell yarn-gateway hbase_opentsdb_tables hdfs_cleaner master_dataset'
+            $roles$: 'cloudera_edge,console_frontend,console_backend_data_logger,console_backend_data_manager,graphite,gobblin,deployment_manager,package_repository,data_service,impala-shell,yarn-gateway,hbase_opentsdb_tables,hdfs_cleaner,master_dataset'
             $cloudera_role$: 'EDGE'
 
   install_deployment:

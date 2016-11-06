@@ -12,6 +12,7 @@ import shutil
 import yaml
 import glob
 import jinja2
+import time
 
 name_regex = "^[\.a-zA-Z0-9-]+$"
 
@@ -20,6 +21,21 @@ Please wait while your PNDA cluster is being created.
 
 This process can last for 1 or 2 hours.
 """
+
+RUNFILE = None
+def init_runfile(cluster):
+    global RUNFILE
+    RUNFILE = 'logs/%s.%s.run' % (cluster, int(time.time()))
+
+def to_runfile(pairs):
+    '''
+    Append arbitrary pairs to a JSON dict on disk from anywhere in the code
+    '''
+    mode = 'w' if not os.path.isfile(RUNFILE) else 'r'
+    with open(RUNFILE, mode) as rf:
+        jrf = json.load(rf) if mode == 'r' else {}
+        jrf.update(pairs)
+        json.dump(jrf, rf)
 
 def name_string(v):
     try:
@@ -52,7 +68,7 @@ def os_cmd(cmdline, print_output=False, verbose=False):
 def get_args():
     epilog = """examples:
   - create cluster
-    $ ./heat_cli.py create -e squirrel-land -f standard -n 5 -o 1 -k 2 -z 3 -s pnda -y
+    $ ./heat_cli.py create -e squirrel-land -f standard -n 5 -o 1 -k 2 -z 3 -s pnda
 
   - destroy existing cluster:
     $ ./heat_cli.py destroy -e squirrel-land
@@ -67,7 +83,6 @@ def get_args():
     banner()
 
     parser.add_argument('command', help='Mode of operation', choices=['create', 'resize', 'destroy', 'status', 'logs'])
-    parser.add_argument('-y', action='store_true', help='Do not prompt for confirmation before creating or destroying VMs')
     parser.add_argument('-e','--pnda-cluster', type=name_string, help='Namespaced environment for machines in this cluster')
     parser.add_argument('-n','--datanodes', type=int, help='How many datanodes for the hadoop cluster')
     parser.add_argument('-o','--opentsdb-nodes', type=int, help='How many Open TSDB nodes for the hadoop cluster')
@@ -78,7 +93,7 @@ def get_args():
     parser.add_argument('-s','--keypair', help='keypair name for ssh to the bastion server')
     parser.add_argument('-v','--verbose', help='Be more verbose')
     parser.add_argument('-bare', '--bare', help='Assume baremetal environment')
-    parser.add_argument('-t', '--templates', help='path to the templates directory')
+    parser.add_argument('-fstype', '--fstype', help='FS type for package repository')
 
     args = parser.parse_args()
     return args
@@ -117,7 +132,7 @@ def process_templates_from_dir(flavor, cname, from_dir, to_dir, vars):
     with open('%s/pnda.yaml' % to_dir, 'w') as outfile:
         yaml.dump(pnda_common, outfile, default_flow_style=False)
 
-def setup_flavor_templates(flavor, cname, dir, is_bare):
+def setup_flavor_templates(flavor, cname, is_bare, fs_type):
 
     resources_dir = '_resources_{}-{}'.format(flavor, cname)
     dest_dir = '{}/{}'.format(os.getcwd(), resources_dir)
@@ -135,6 +150,8 @@ def setup_flavor_templates(flavor, cname, dir, is_bare):
         templateVars['create_network'] = 1
         templateVars['create_volumes'] = 1
         templateVars['create_bastion'] = 1
+
+    templateVars['package_repository_fs_type'] = fs_type
 
     for yaml_file in glob.glob('../../templates/%s/*.yaml' % flavor):
         shutil.copy(yaml_file, './')
@@ -168,6 +185,12 @@ def setup_flavor_templates(flavor, cname, dir, is_bare):
         os.system('cp -rf ../../templates/%s/scripts/* ./scripts/' % flavor)
 
 def create_cluster(args):
+
+    # TODO add bastion/saltmaster endpoints to runfile
+    init_runfile(args.pnda_cluster)
+
+    to_runfile({'cmdline':sys.argv})
+
     pnda_cluster = args.pnda_cluster
     datanodes = args.datanodes
     tsdbnodes = args.opentsdb_nodes
@@ -179,6 +202,10 @@ def create_cluster(args):
     command = args.command
     is_bare = args.bare
 
+    if not args.fstype:
+        fs_type = 'swift'
+    else:
+        fs_type = args.fstype
     print 'Deploying Flavor {}'.format(flavor)
 
     if flavor == 'standard':
@@ -209,6 +236,11 @@ def create_cluster(args):
         if zknodes == None:
             zknodes = 0
 
+    if not os.path.isfile('../deploy'):
+        with open('../deploy', 'w') as git_key_file:
+            git_key_file.write('If authenticated access to the platform-salt git repository is required then' +
+                               ' replace this file with a key that grants access to the git server.\n')
+
     stack_params = []
 
     stack_params.append('--parameter ZookeeperNodes={}'.format(zknodes))
@@ -226,11 +258,9 @@ def create_cluster(args):
     stack_params.append(pnda_cluster)
     stack_params_string = ' '.join(stack_params)
 
-    templates_directory = args.templates
-
     if command == 'create':
         print CREATE_INFO
-        setup_flavor_templates(flavor, pnda_cluster, templates_directory, is_bare)
+        setup_flavor_templates(flavor, pnda_cluster, is_bare, fs_type)
         cmdline = 'openstack stack create --timeout 120 --wait --template {} --environment {} {}'.format('pnda.yaml',
                                                                                     'pnda_env.yaml',
                                                                                     stack_params_string)

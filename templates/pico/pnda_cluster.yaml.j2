@@ -1,3 +1,12 @@
+# pnda_cluster.yaml defines the instances to create for this flavor of PNDA
+# The resource_registry.yaml file defines which yaml template to apply to
+# each instance type, and these specific yaml files configure the
+# instance as required for that type of node.
+
+# It is processed as a jinja2 template with the following parameters:
+#   - create_network: 0|1. Set to 1 to create network related resources or to 0 when running
+#                          for an openstack ironic bare-metal install
+
 heat_template_version: 2014-10-16
 
 parameters:
@@ -125,6 +134,8 @@ resources:
   bastion:
     type: OS::Pnda::bastion
     properties:
+      signal_transport: { get_param: signal_transport }
+      software_config_transport: { get_param: software_config_transport }
       Flavor: { get_param: BastionFlavor }
       Image: { get_param: image_id }
       name:
@@ -152,6 +163,8 @@ resources:
       resource_def:
         type: OS::Pnda::kafka
         properties:
+          signal_transport: { get_param: signal_transport }
+          software_config_transport: { get_param: software_config_transport }
           Flavor: { get_param: KafkaFlavor }
           Image: { get_param: image_id }
           name:
@@ -174,6 +187,8 @@ resources:
   manager1:
     type: OS::Pnda::manager1
     properties:
+      signal_transport: { get_param: signal_transport }
+      software_config_transport: { get_param: software_config_transport }
       Flavor: { get_param: Manager1Flavor }
       Image: { get_param: image_id }
       name:
@@ -194,6 +209,8 @@ resources:
   edge:
     type: OS::Pnda::edge
     properties:
+      signal_transport: { get_param: signal_transport }
+      software_config_transport: { get_param: software_config_transport }
       Flavor: { get_param: EdgeFlavor }
       Image: { get_param: image_id }
       name:
@@ -217,6 +234,8 @@ resources:
       resource_def:
         type: OS::Pnda::dn
         properties:
+          signal_transport: { get_param: signal_transport }
+          software_config_transport: { get_param: software_config_transport }
           Flavor: { get_param: DatanodeFlavor }
           Image: { get_param: image_id }
           name:

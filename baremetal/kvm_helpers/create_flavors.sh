@@ -2,7 +2,6 @@
 
 #set -xe
 
-
 openstack flavor delete pnda-micro
 openstack flavor delete pnda-zookeeper
 openstack flavor delete pico-kafka
@@ -21,4 +20,3 @@ openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boo
 openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="edge" pico-edge
 openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="dn" pico-dn
 openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="mgr" pico-mgr
-

@@ -1,3 +1,7 @@
+# Definition for the mgr1 instance type
+# Specifies which bootstrap script to run to set up this instance type and which roles
+# to apply to this instance type
+
 heat_template_version: 2014-10-16
 
 parameters:
@@ -71,7 +75,7 @@ resources:
             $pnda_cluster$: { get_param: cluster_name }
             $flavor$: { get_param: pnda_flavor }
             $volume_dev$: { get_param: log_mountpoint }
-            $roles$: 'cloudera_namenode mysql_connector'
+            $roles$: 'cloudera_namenode,mysql_connector'
             $cloudera_role$: 'MGR01'
   install_deployment:
     type: OS::Heat::SoftwareDeployment

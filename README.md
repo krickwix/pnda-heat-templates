@@ -8,18 +8,18 @@
 
 To use the PNDA command line interface, you will need to install the python, heat and nova clients. To install them on Ubuntu, run:
 
-```
+```sh
 $ sudo apt-get -y update
 $ sudo apt-get -y install python python-pip python-dev
-$ sudo pip install python-heatclient
-$ sudo pip install python-openstackclient
+$ cd cli
+$ sudo pip install -r requirements.txt
 ```
 
 ### Git credentials
 
 The stack will make use of git repositories. In case git authentication is required, a private key is required. It is then necessary to have an ssl keypair, whose public key is registered in the git server. To authenticate against the server the private key value must be passed. By default a `deploy` file must be present in the templates directory. If you already own a keypair, it probably stands in the `.ssh` subdirectory of your home directory. If this keypair is registered against the git server, it is only necessary to copy its content into the `deploy` file.
 
-```
+```sh
 $ cd pnda-heat-templates
 $ cp ~/.ssh/id_rsa deploy
 ```
@@ -34,7 +34,7 @@ Also uncomment `#deploy` and specifiy url of your git repo in `pnda_env.yaml` fi
 
 As a pre-requisite to use the CLI, it is necessary to setup some openstack required environment variables. The easy way to do so is to retrieve an rc file from the horizon dashboard of your OpenStack platform, in the context of the targeted OpenStack project. Once retrieved just source it.
 
-```
+```sh
 $ . <project>-openrc.sh
 ```
 
@@ -71,7 +71,7 @@ You can optionally add the `JavaMirror`, `ClouderaParcelsMirror` and `AnacondaPa
 ### Package repository 
 
 The default backend storage for the package repository is Swift and so you should have the containers created as defined with the parameters 'pnda_apps_container' and 'pnda_apps_folder' as describe just above.
-So then, for the package repository backend storage type, defined by the parameter package_repository_fs_type, it could be either:
+So then, for the package repository backend storage type, it is the 'fstype' argument of the heat cli, it could be either:
 
 - 'swift': in case you will store your packages within Swift so the configuration will be:
 ```
@@ -80,8 +80,6 @@ So then, for the package repository backend storage type, defined by the paramet
 
 - 's3': in case you will want to use AWS S3 so the configuration will be:
 ```
-  package_repository_fs_type: 's3'
-
   # AWS configuration
   S3_ACCESS_KEY_ID=xxxx
   S3_SECRET_ACCESS_KEY=xxxx
@@ -90,39 +88,35 @@ So then, for the package repository backend storage type, defined by the paramet
 - 'sshfs': if you want to have the packages on another host which will be connected from the package repository host. For more information about sshfs, go to [SSHFS libfuse](https://github.com/libfuse/sshfs). The configuration will be:
 
 ```
-  package_repository_fs_type: 'sshfs'
   package_repository_fs_location_path: '/opt/pnda/packages'
   package_repository_sshfs_user: 'cloud-user'
   package_repository_sshfs_host: '127.0.0.1'
   package_repository_sshfs_path: '/mnt/packages'
   package_repository_sshfs_key: pr_key
 ```
+Do not forget also to copy the key.pem file used by sshfs to connect to the remote host:
+```sh
+$ cd pnda-heat-templates
+$ cp PATH/key.pem pr_key
+```
 
 - 'volume': in case of the standard flavor, we have attached a volume in order to be able to store lot of packages and this is mount by default on the edge node. The configuration will be:
 
 ```
-  package_repository_fs_type: 'volume'
   package_repository_fs_location_path: '/mnt/packages'
 ```
 
 - 'local': if you want the packages to be store localy on the package repository node. The configuration will be:
 
 ```
-  package_repository_fs_type: 'local'
   package_repository_fs_location_path: '/opt/pnda/packages'
-```
-
-Do not forget also to copy the key.pem file used by sshfs to connect to the remote host:
-```
-$ cd pnda-heat-templates
-$ cp PATH/key.pem pr_key
 ```
 
 ### The CLI
 
 The `heat_cli.py` scripts allows to launch a PNDA deployment. It sits in the `cli` subdirectory.
 
-```
+```sh
 $ cd cli
 $ ./heat_cli.py
 usage: heat_cli.py [-h] [-y] [-e PNDA_CLUSTER] [-n DATANODES]
@@ -140,7 +134,7 @@ There are various PNDA flavors: this allows changing role distribution across th
 
 We create a standard deployment named `cation`. We specify 3 data nodes, 1 opentsdb node, 2 kafka nodes, 3 zookeeper nodes:
 
-```
+```sh
 $ ./heat_cli.py -e cation -n 3 -o 1 -k 2 -z 3 -f standard -s <existing_neutron_keypair> create
 +--------------------------------------+------------------+--------------------+----------------------+--------------+
 | id                                   | stack_name       | stack_status       | creation_time        | updated_time |
@@ -218,7 +212,7 @@ $ ./heat_cli.py -e cation -n 3 -o 1 -k 2 -z 3 -f standard -s <existing_neutron_k
 
 If we examine the previously created stack :
 
-```
+```sh
 $ heat stack-list -n | grep cation
 | 80d510fe-8fb5-4fbc-b4ba-a65cafa12103 | cation                                                                  | CREATE_COMPLETE | 2016-04-11T12:47:22Z | None         | None                                 |
 | d8c4e4aa-b4de-4742-a430-d85553e66987 | cation-pnda_cluster-obz7kxxsnatx                                       | CREATE_COMPLETE | 2016-04-11T12:50:40Z | None         | 80d510fe-8fb5-4fbc-b4ba-a65cafa12103 |
@@ -242,7 +236,7 @@ A PNDA deployment is a heat stack, and nested stacks deploying a cluster made of
 
 We can have a look at the resources of the stack :
 
-```
+```sh
 $ heat resource-list cation
 +----------------------+-------------------------------------------------------------------------------------+------------------------------+-----------------+----------------------+
 | resource_name        | physical_resource_id                                                                | resource_type                | resource_status | updated_time         |
@@ -270,7 +264,7 @@ $ heat resource-list cation
 
 And ultimately the resources from the nested stacks as well :
 
-```
+```sh
 $ heat resource-list -n 5 cation                                                                                                                                                        [113/489]
 +----------------------+-------------------------------------------------------------------------------------+------------------------------+-----------------+----------------------+---------------------------------------
 ----------------------------------+
@@ -416,7 +410,7 @@ ger1-pkyrsg6kywg5                 |
 
 Examining the provisioned instances :
 
-```
+```sh
 $ nova list | grep cation
 | 61f96b51-264a-4e76-8b2b-d0d287f24be8 | cation-lab-0-bastion     | ACTIVE | -          | Running     | cation-lab-0-net=192.168.10.18, 10.60.18.34 |
 | e8091ceb-222f-4d91-b5bf-04943da01558 | cation-lab-0-cdh-cm      | ACTIVE | -          | Running     | cation-lab-0-net=192.168.10.19              |
@@ -444,13 +438,13 @@ $ nova list | grep cation
 
 The only instance reachable from outside the deployment is the bastion instance. It can be sshed:
 
-```
+```sh
 $ ssh -i <your_private_key file> cloud-user@10.60.18.197
 ```
 
 From the bastion instance you can then ssh to the other instances using the dynamically created private key whose file sits in the cloud-user home directory.
 
-```
+```sh
 cloud-user@cation-bastion:~$ ls -l
 total 4
 -rw------- 1 cloud-user cloud-user 1675 Apr 11 12:51 cation-pnda_cluster-obz7kxxsnatx-bastion-ccdyikzg2gar.pem
@@ -458,7 +452,7 @@ total 4
 
 ssh to the saltmaster instance:
 
-```
+```sh
 cloud-user@cation-bastion:~$ ssh -i cation-pnda_cluster-obz7kxxsnatx-bastion-ccdyikzg2gar.pem salt
 The authenticity of host 'salt (10.10.10.13)' can't be established.
 ECDSA key fingerprint is 67:f4:3d:79:7e:a1:7f:94:59:6e:83:ba:2d:bd:23:1c.
