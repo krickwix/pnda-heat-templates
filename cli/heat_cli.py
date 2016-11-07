@@ -226,7 +226,7 @@ def create_cluster(args):
             kafkanodes = 2
         if zknodes == None:
             zknodes = 3
-    elif flavor == 'pico' || flavor == 'femto':
+    elif (flavor == 'pico') or (flavor == 'femto'):
         if datanodes == None:
             datanodes = 1
         if tsdbnodes == None:
