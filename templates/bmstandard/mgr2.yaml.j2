@@ -79,7 +79,7 @@ resources:
 {%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
 {%endif%}
-            $roles$: 'cloudera_namenode mysql_connector cloudera_zookeeper oozie_database hue'
+            $roles$: 'cloudera_namenode,mysql_connector,cloudera_zookeeper,oozie_database,hue'
             $cloudera_role$: 'MGR02'
 
   install_deployment:

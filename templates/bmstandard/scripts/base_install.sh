@@ -1,7 +1,8 @@
 #!/bin/bash -v
 
 set -e
-export roles="$roles$"
+
+ROLES=$roles$
 
 cat >> /etc/hosts <<EOF
 $master_ip$ saltmaster salt
@@ -21,22 +22,22 @@ pnda:
 pnda_cluster: $pnda_cluster$
 EOF
 
-if [ "x$cloudera_role$" != "x$" ]; then
+if [ "$cloudera_role$" != "$" ]; then
   cat >> /etc/salt/grains <<EOF
 cloudera:
   role: $cloudera_role$
 EOF
 fi
 
-if [ "x$brokerid$" != "x$" ]; then
+if [ "$brokerid$" != "$" ]; then
   cat >> /etc/salt/grains <<EOF
 broker_id: $brokerid$
 EOF
 fi
 
-if [ "x$roles$" != "x$" ]; then
+if [ "x${ROLES}" != "x" ]; then
 cat >> /etc/salt/grains <<EOF
-`printf "%b" "$a"`
+roles: [${ROLES}]
 EOF
 fi
 

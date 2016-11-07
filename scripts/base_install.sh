@@ -26,22 +26,14 @@ pnda:
 pnda_cluster: $pnda_cluster$
 EOF
 
-<<<<<<< HEAD
-if [ "x$cloudera_role$" != "x$" ]; then
-=======
-# The cloudera:role grain is used by the cm_setup.py (in platform-salt) script to
-# place specific cloudera roles on this instance.
-# The mapping of cloudera roles to cloudera:role grains is
-# defined in the cfg_<flavor>.py.tpl files (in platform-salt)
-if [ "x$cloudera_role$" != "x" ]; then
->>>>>>> 2615de5ea61efb7cb992ab9efcc440454967f601
+if [ "$cloudera_role$" != "$" ]; then
   cat >> /etc/salt/grains <<EOF
 cloudera:
   role: $cloudera_role$
 EOF
 fi
 
-if [ "x$brokerid$" != "x$" ]; then
+if [ "$brokerid$" != "$" ]; then
   cat >> /etc/salt/grains <<EOF
 broker_id: $brokerid$
 EOF
