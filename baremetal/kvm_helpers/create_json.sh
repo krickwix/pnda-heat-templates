@@ -79,6 +79,7 @@ jq . << EOF > ~/instackenv.json
       "pm_user": "stack"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     },
     {
@@ -202,3 +203,8 @@ jq . << EOF > ~/instackenv.json
   ]
 }
 EOF
+=======
+    }
+  ]
+}
+>>>>>>> 2615de5ea61efb7cb992ab9efcc440454967f601
