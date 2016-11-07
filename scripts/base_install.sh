@@ -30,7 +30,7 @@ EOF
 # place specific cloudera roles on this instance.
 # The mapping of cloudera roles to cloudera:role grains is
 # defined in the cfg_<flavor>.py.tpl files (in platform-salt)
-if [ "$cloudera_role$" != "$" ]; then
+if [ "x$cloudera_role$" != "x" ]; then
   cat >> /etc/salt/grains <<EOF
 cloudera:
   role: $cloudera_role$
