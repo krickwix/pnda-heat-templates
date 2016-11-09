@@ -9,7 +9,7 @@ echo "stack ALL=(root) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/stack
 sudo chmod 0440 /etc/sudoers.d/stack
 su - stack
 ```
-Setting the host name, replace the <undercloud_fqdn> with the appropriate hostname
+Setting the host name, replace the ```<undercloud_fqdn>``` with the appropriate hostname
 ```
 sudo hostnamectl set-hostname <undercloud_fqdn>
 sudo hostnamectl set-hostname --transient <undercloud_fqdn>
@@ -18,16 +18,28 @@ Updating hosts file
 ```
 127.0.0.1   <undercloud_fqdn> <hostname> localhost
 ```
+A general recommendation is to work with a terminal multiplexer such as screen or tmux.
+```
+sudo yum -y install tmux
+tmux
+```
 Setting up the required repositories
+* Upstream Delorean
 ```
 sudo curl -L -o /etc/yum.repos.d/delorean-mitaka.repo https://trunk.rdoproject.org/centos7-mitaka/current/delorean.repo
 sudo curl -L -o /etc/yum.repos.d/delorean-deps-mitaka.repo http://trunk.rdoproject.org/centos7-mitaka/delorean-deps.repo
 ```
+* Delorean mirror _(LAB ONLY)_
+```
+sudo curl -L -o /etc/yum.repos.d/delorean.repo http://10.60.17.190/dlrn/delorean.repo
+sudo curl -L -o /etc/yum.repos.d/delorean-deps.repo http://10.60.17.190/dlrn/delorean-mitaka-testing.repo
+```
+Installing the tripleo client
 ```
 sudo yum -y install yum-plugin-priorities
 sudo yum install -y python-tripleoclient
 ```
-Undercloud configuration, replace <undercloud_fqdn> and <provisioning_interface>
+Undercloud configuration, replace ```<undercloud_fqdn>``` and ```<provisioning_interface>``` with appropriate values
 ```
 cat > ~/undercloud.conf <<EOF
 [DEFAULT]
@@ -53,7 +65,7 @@ store_events = false
 [auth]
 EOF
 ```
-Edit the ```undercloud.conf``` file to replace the ```undercloud_fqdn``` and the ```<provisioning_interface>``` fields. The provisioning interface is preferably the unnumbered one.
+Edit the ```undercloud.conf``` file to replace the ```<undercloud_fqdn>``` and the ```<provisioning_interface>``` fields. The provisioning interface is preferably the unnumbered one.
 ```
 ip a
 vi ~/undercloud.conf
@@ -61,9 +73,8 @@ vi ~/undercloud.conf
 
 Undercloud deployment
 ```
-export DIB_YUM_REPO_CONF="/etc/yum.repos.d/delorean-deps-mitaka.repo /etc/yum.repos.d/delorean-mitaka.repo"
+export DIB_YUM_REPO_CONF="/etc/yum.repos.d/delorean-deps.repo /etc/yum.repos.d/delorean.repo"
 export NODE_DIST=centos7
-export DELOREAN_TRUNK_REPO="http://trunk.rdoproject.org/centos7-mitaka/current/"
 openstack undercloud install
 
 […]
@@ -105,14 +116,21 @@ There are two types of images:
 *	the pnda image itself
 
 First we create the deployment and discovery images
+* CentOS & Delorean Mirror  _(LAB ONLY)_
 ```
-export DIB_YUM_REPO_CONF="/etc/yum.repos.d/delorean-deps-mitaka.repo /etc/yum.repos.d/delorean-mitaka.repo"
+export DIB_DISTRIBUTION_MIRROR="http://pirl-mirror.cisco.com/ubuntu/trusty/"
+export DIB_YUM_REPO_CONF="/etc/yum.repos.d/delorean-deps.repo /etc/yum.repos.d/delorean.repo /etc/yum.repos.d/base.repo /etc/yum.repos.d/extras.repo /etc/yum.repos.d/updates.repo"
+```
+```
 export NODE_DIST=centos7
-export DELOREAN_TRUNK_REPO="http://trunk.rdoproject.org/centos7-mitaka/current/"
 mkdir ~/images && cd ~/images
 openstack overcloud image build --all
 ```
 Second we create the pnda image
+* Ubuntu Mirror _(LAB ONLY)_
+```
+export DIB_DISTRIBUTION_MIRROR="http://pirl-mirror.cisco.com/ubuntu/trusty/"
+```
 ```
 cd
 git clone https://github.com/pndaproject/pnda-dib-elements.git
@@ -135,7 +153,50 @@ export PUPPET_COMMON_ELEMENTS="\
     cloud-init-pnda"
 cd images && disk-image-create -a amd64 -o pnda-image ubuntu $PUPPET_COMMON_ELEMENTS 2>&1 | tee dib-pnda-image.log
 ```
-At this point it might be necessary to customize the images more. Adding some parameters to the kernel cmdline for example.
+At this point it might be necessary to customize the images more. Adding some parameters to the kernel cmdline for example. For that purpose we can use guestfish from the libguestfs-tools package. This a convenient tool to modify qcow2 images filesystems in place.
+```
+sudo yum -y install libguestfs-tools
+cd
+guestfish -a images/pnda-image.qcow2
+
+Welcome to guestfish, the guest filesystem shell for
+editing virtual machine filesystems and disk images.
+
+Type: 'help' for help on commands
+      'man' to read the manual
+      'quit' to quit the shell
+
+><fs> run
+ 100% ⟦▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒⟧ 00:00
+><fs> list-filesystems
+/dev/sda: ext4
+><fs> mount /dev/sda /
+><fs> vi /etc/default/grub
+[...]
+><fs> quit
+```
+In the same spirit, we can setup a known root password using virt-customize.
+```
+virt-customize -a images/pnda-image.qcow2 --root-password password:cisco
+```
+Customizing the image to use the ubuntu mirror _(LAB ONLY)_
+```
+guestfish -a images/pnda-image.qcow2
+
+Welcome to guestfish, the guest filesystem shell for
+editing virtual machine filesystems and disk images.
+
+Type: 'help' for help on commands
+      'man' to read the manual
+      'quit' to quit the shell
+
+><fs> run
+ 100% ⟦▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒⟧ 00:00
+><fs> list-filesystems
+/dev/sda: ext4
+><fs> mount /dev/sda /
+```
+Uploading the previously created/customized images into the undercloud's glance.
 ```
 openstack overcloud image upload
 glance image-create  --name pnda-image-initrd --disk-format ari --container-format ari --file pnda-image.initrd --progress
@@ -146,6 +207,7 @@ pnda_kernel_id=$(glance image-list|grep pnda-image-vmlinuz|awk {'print $2'})
 glance image-update --property ramdisk_id=$pnda_initrd_id pnda-image
 glance image-update --property kernel_id=$pnda_kernel_id pnda-image
 ```
+
 ## Setting up a virtualized environment
 
 ```
@@ -186,12 +248,22 @@ openstack baremetal configure boot
 **What happened here:** ```create_vms.sh```
 
 ```
+sudo virsh list --all
+
+```
+
+```
 openstack flavor list
 ```
 
 ```
 openstack baremetal list
 ```
+
+```
+openstack overcloud profiles list
+```
+
 Starting nodes introspection
 ```
 openstack baremetal introspection bulk start
@@ -233,4 +305,53 @@ Node 870bbdfa-6265-470f-8b0b-b75f277c96e8 has been set to available.
 Node 9e168fb2-3e3c-465e-8b82-60c0e1bd83ed has been set to available.
 Introspection completed.
 ```
+Observe the results of introspection
+```
 
+```
+
+# Deploying PNDA
+Setting up the environment file
+```
+cd ~/pnda-heat-templates
+cat > pnda_env.yaml <<EOF
+parameter_defaults:
+  public_net: 5982b761-802a-4af3-9c0b-c3b457559179
+  private_net_name: 'HOTPndaNetwork'
+  private_net_cidr: '192.168.10.0/24'
+  private_net_pool_end: '192.168.10.250'
+  private_net_pool_start: '192.168.10.10'
+  private_net_gateway: '192.168.10.1'
+  name_servers: [ "144.254.71.184", "173.38.200.100" ]
+  image_id: pnda-image
+  keystone_user: '$OS_USERNAME'
+  keystone_password: '$OS_PASSWORD'
+  keystone_tenant: '$OS_TENANT_NAME'
+  keystone_auth_url: '$OS_AUTH_URL'
+  keystone_region_name: 'regionOne'
+  JavaMirror: 'http://10.60.17.100/NFS/repos/java/jdk/8u74-b02/jdk-8u74-linux-x64.tar.gz'
+  ClouderaParcelsMirror: 'http://10.60.17.100/mirror/archive.cloudera.com/cdh5/parcels/5.5.2/'
+  pnda_apps_container:  'pnda_apps'
+  pnda_apps_folder:  'releases'
+  pnda_archive_container:  'pnda_archive'
+  packages_server_uri: 'http://173.39.246.113/'
+  platform_git_repo_uri: 'https://github.com/krickwix/platform-salt.git'
+  GitBranch: PNDA-2271
+  git_private_key_file: deploy
+  NtpServers: 'ntp.esl.cisco.com'
+  signal_transport: TEMP_URL_SIGNAL
+  software_config_transport: POLL_TEMP_URL
+  package_repository_fs_type: 'swift'
+EOF
+touch deploy
+touch pr_key
+swift post pnda_apps
+swift post pnda_archive
+sudo yum -y install python-pip
+sudo pip install jinja2 --upgrade
+```
+Create the stack
+```
+cd cli
+./heat_cli.py -e barepnda -f femto -b PNDA-2271 -s default -bare true create
+```
