@@ -1,11 +1,11 @@
 parameter_defaults:
-  CMFlavor: p.cm
-  Manager1Flavor: p.mgr
-  Manager2Flavor: p.mgr
-  EdgeFlavor: p.edge
-  ZookeeperFlavor: p.zookeeper
-  KafkaFlavor: p.kafka
-  DatanodeFlavor: p.dn
-  SaltmasterFlavor: p.master
+  CMFlavor: s1.small
+  Manager1Flavor: s1.medium
+  Manager2Flavor: s1.medium
+  EdgeFlavor: s1.small
+  ZookeeperFlavor: s1.small
+  KafkaFlavor: s1.medium
+  DatanodeFlavor: s1.large
+  SaltmasterFlavor: master
   DatanodeVolumeSize: 1024
   PndaFlavor: bmstandard
