@@ -1,8 +1,16 @@
+# Definition for the mgr1 instance type
+# Specifies which bootstrap script to run to set up this instance type and which roles
+# to apply to this instance type
+
+# It is processed as a jinja2 template with the following parameters:
+#   - create_network: 0|1. Set to 1 to create network related resources or to 0 when running
+#                          for an openstack ironic bare-metal install
+
 heat_template_version: 2014-10-16
 
 parameters:
   Flavor:
-    description: Flavor of the cloudera manager server
+    description: Flavor of the manager1 server
     type: string
     default: m1.xlarge
   KeyName:
@@ -28,38 +36,36 @@ parameters:
     type: string
   pnda_flavor:
     type: string
-{%if create_volumes is equalto 1 %}
+    default: standard
   logvolume_size:
     type: number
-    default: 500
+    default: 10
   log_mountpoint:
     type: string
     default: /dev/vdb
-{%endif%}
   signal_transport:
     type: string
+    default: TEMP_URL_SIGNAL
   software_config_transport:
     type: string
+    default: POLL_TEMP_URL
+
 
 resources:
 {%if create_network is equalto 1 %}
   sec_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      description: CM SecurityGroup
+      description: CDH Manager SecurityGroup
       name:
         str_replace:
           template:
-            cname-cdh-edge
+            cname-cdh-mgr1
           params:
             cname: { get_param: cluster_name }
       rules:
         - remote_ip_prefix: 0.0.0.0/0
           protocol: icmp
-        - remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 7180
-          port_range_max: 7180
   port:
     type: OS::Neutron::Port
     properties:
@@ -68,6 +74,7 @@ resources:
         - subnet_id: { get_param: PrivateSubnet }
       security_groups: [{ get_resource: sec_group }, { get_param: pnda_secgroup }]
 {%endif%}
+
   install_config:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -76,14 +83,13 @@ resources:
         str_replace:
           template: {get_file: scripts/base_install.sh }
           params:
-            $flavor$: { get_param: pnda_flavor }
             $master_ip$: { get_param: SaltmasterIP }
             $pnda_cluster$: { get_param: cluster_name }
-{%if create_volumes is equalto 1 %}
+            $flavor$: { get_param: pnda_flavor }
             $volume_dev$: { get_param: log_mountpoint }
-{%endif%}
-            $roles$: 'cloudera_edge,mysql_connector,console_frontend,console_backend_data_logger,console_backend_data_manager,graphite,gobblin,deployment_manager,package_repository,data_service,impala-shell,yarn-gateway,hbase_opentsdb_tables,hdfs_cleaner,master_dataset,jupyter,kafka_manager'
-            $cloudera_role$: 'EDGE'
+            $roles$: 'cloudera_namenode,mysql_connector,oozie_database,hue,opentsdb,grafana'
+            $cloudera_role$: 'MGR01'
+
   install_deployment:
     type: OS::Heat::SoftwareDeployment
 {%if create_volumes is equalto 1 %}
@@ -95,13 +101,12 @@ resources:
         get_resource: install_config
       server:
         get_resource: server
-
 {%if create_volumes is equalto 1 %}
   logvolume:
     type: OS::Cinder::Volume
     properties:
       size: { get_param: logvolume_size }
-      description: Volume for cloudera manager logs
+      description: Volume for manager1 logs
 
   logvolume_attachment:
     type: OS::Cinder::VolumeAttachment
