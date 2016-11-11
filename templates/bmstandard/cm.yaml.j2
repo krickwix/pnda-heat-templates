@@ -82,31 +82,7 @@ resources:
 {%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
 {%endif%}
-<<<<<<< HEAD:templates/bmstandard/cm.yaml.j2
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD:templates/bmstandard/cm.yaml.j2
-            $roles$: 'cloudera_manager platform_testing_cdh platform_testing_general mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
-=======
-            $roles$: 'cloudera_manager platform_testing_cdh mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
->>>>>>> 8890838... dev: jinjaize templates for bmstandard flavor:templates/bmstandard/cm.yaml.j2
-=======
-            $roles$: 'cloudera_manager platform_testing_cdh platform_testing_general mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
->>>>>>> 0a85452... dev: adding missing platform_testing_general role
-=======
-            $roles$: 'cloudera_manager platform_testing_cdh mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
->>>>>>> 2a73231... dev: jinjaize templates for bmstandard flavor
-=======
-            $roles$: 'cloudera_manager platform_testing_cdh platform_testing_general mysql_connector cloudera_namenode mysql_connector elk logserver opentsdb grafana kibana_dashboard'
->>>>>>> 25cda50... dev: adding missing platform_testing_general role
-=======
             $roles$: 'cloudera_manager,platform_testing_cdh,platform_testing_general,mysql_connector,cloudera_namenode,mysql_connector,elk,logserver,opentsdb,grafana,kibana_dashboard'
->>>>>>> e4e111a... comma separated roles
-=======
-            $roles$: 'cloudera_manager,platform_testing_cdh,platform_testing_general,mysql_connector,cloudera_namenode,mysql_connector,elk,logserver,opentsdb,grafana,kibana_dashboard'
->>>>>>> 08eb22ebf98ef54b43adbc9ee0d814f5891ff376:templates/bmstandard/cm.yaml.j2
             $cloudera_role$: 'CM'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
