@@ -18,6 +18,13 @@ Updating hosts file
 ```
 127.0.0.1   <undercloud_fqdn> <hostname> localhost
 ```
+
+```
+sudo curl -L -o /etc/yum.repos.d/base.repo http://pirl-mirror.cisco.com/centos7/base.repo
+sudo curl -L -o /etc/yum.repos.d/updates.repo http://pirl-mirror.cisco.com/centos7/updates.repo
+sudo curl -L -o /etc/yum.repos.d/extras.repo http://pirl-mirror.cisco.com/centos7/extras.repo
+sudo curl -L -o /etc/yum.repos.d/centosplus.repo http://pirl-mirror.cisco.com/centos7/centosplus.repo
+```
 A general recommendation is to work with a terminal multiplexer such as screen or tmux.
 ```
 sudo yum -y install tmux
@@ -118,7 +125,6 @@ There are two types of images:
 First we create the deployment and discovery images
 * CentOS & Delorean Mirror  _(LAB ONLY)_
 ```
-export DIB_DISTRIBUTION_MIRROR="http://pirl-mirror.cisco.com/ubuntu/trusty/"
 export DIB_YUM_REPO_CONF="/etc/yum.repos.d/delorean-deps.repo /etc/yum.repos.d/delorean.repo /etc/yum.repos.d/base.repo /etc/yum.repos.d/extras.repo /etc/yum.repos.d/updates.repo"
 ```
 ```
@@ -129,8 +135,9 @@ openstack overcloud image build --all
 Second we create the pnda image
 * Ubuntu Mirror _(LAB ONLY)_
 ```
-export DIB_DISTRIBUTION_MIRROR="http://pirl-mirror.cisco.com/ubuntu/trusty/"
+export DIB_DISTRIBUTION_MIRROR="http://pirl-mirror.cisco.com/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu"
 ```
+
 ```
 cd
 git clone https://github.com/pndaproject/pnda-dib-elements.git
@@ -151,7 +158,7 @@ export PUPPET_COMMON_ELEMENTS="\
     stable-interface-names \
     grub2 \
     cloud-init-pnda"
-cd images && disk-image-create -a amd64 -o pnda-image ubuntu $PUPPET_COMMON_ELEMENTS 2>&1 | tee dib-pnda-image.log
+cd ~/images && disk-image-create -a amd64 -o pnda-image ubuntu $PUPPET_COMMON_ELEMENTS 2>&1 | tee dib-pnda-image.log
 ```
 At this point it might be necessary to customize the images more. Adding some parameters to the kernel cmdline for example. For that purpose we can use guestfish from the libguestfs-tools package. This a convenient tool to modify qcow2 images filesystems in place.
 ```
@@ -181,7 +188,7 @@ virt-customize -a images/pnda-image.qcow2 --root-password password:cisco
 ```
 Customizing the image to use the ubuntu mirror _(LAB ONLY)_
 ```
-guestfish -a images/pnda-image.qcow2
+guestfish -a ~/images/pnda-image.qcow2
 
 Welcome to guestfish, the guest filesystem shell for
 editing virtual machine filesystems and disk images.
@@ -195,9 +202,27 @@ Type: 'help' for help on commands
 ><fs> list-filesystems
 /dev/sda: ext4
 ><fs> mount /dev/sda /
+><fs> vi /etc/cloud/cloud.cfg
 ```
+Set the following in the ```cloud.cfg``` file under the ```package_mirrors:``` 
+```
+         primary:
+           - http://pirl-mirror.cisco.com/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu/
+           - http://%(ec2_region)s.ec2.archive.ubuntu.com/ubuntu/
+           - http://%(availability_zone)s.clouds.archive.ubuntu.com/ubuntu/
+           - http://%(region)s.clouds.archive.ubuntu.com/ubuntu/
+         security:
+           - http://pirl-mirror.cisco.com/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu/
+```
+End guestfish
+```
+><fs> umount /dev/sda
+><fs> quit
+```
+
 Uploading the previously created/customized images into the undercloud's glance.
 ```
+cd ~/images
 openstack overcloud image upload
 glance image-create  --name pnda-image-initrd --disk-format ari --container-format ari --file pnda-image.initrd --progress
 glance image-create  --name pnda-image-vmlinuz --disk-format aki --container-format aki --file pnda-image.vmlinuz --progress
