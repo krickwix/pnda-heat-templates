@@ -11,7 +11,7 @@ virsh define pnda-master.xml
 
 # KAFKA
 for i in {1..1};do qemu-img create -f qcow2 -o preallocation=metadata pnda-kafka-$i.qcow2 40G;done
-for i in {1..1};do virt-install  --name=pnda-kafka-$i --file=pnda-kafka-$i.qcow2 --graphics vnc,listen=0.0.0.0 --vcpus=2 --ram=2048 --network bridge=br-ctlplane,virtualport_type=openvswitch,model=virtio  --network network=default,model=virtio --os-type=linux --boot hd --dry-run --print-xml > pnda-kafka-$i.xml;done
+for i in {1..1};do virt-install  --name=pnda-kafka-$i --file=pnda-kafka-$i.qcow2 --graphics vnc,listen=0.0.0.0 --vcpus=2 --ram=4096 --network bridge=br-ctlplane,virtualport_type=openvswitch,model=virtio  --network network=default,model=virtio --os-type=linux --boot hd --dry-run --print-xml > pnda-kafka-$i.xml;done
 for i in {1..1};do virsh define pnda-kafka-$i.xml; done
 
 # EDGE
@@ -33,7 +33,7 @@ for i in {1..1};do \
 qemu-img create -f qcow2 -o preallocation=metadata pnda-cdh-mgr$i.qcow2 40G;\
 done
 for i in {1..1};do \
-virt-install  --name=pnda-cdh-mgr$i --file=pnda-cdh-mgr$i.qcow2 --graphics vnc,listen=0.0.0.0 --vcpus=2 --ram=6144 --network bridge=br-ctlplane,virtualport_type=openvswitch,model=virtio  --network network=default,model=virtio --os-type=linux --boot hd --dry-run --print-xml > pnda-cdh-mgr$i.xml; \
+virt-install  --name=pnda-cdh-mgr$i --file=pnda-cdh-mgr$i.qcow2 --graphics vnc,listen=0.0.0.0 --vcpus=2 --ram=8192 --network bridge=br-ctlplane,virtualport_type=openvswitch,model=virtio  --network network=default,model=virtio --os-type=linux --boot hd --dry-run --print-xml > pnda-cdh-mgr$i.xml; \
 virsh define pnda-cdh-mgr$i.xml; \
 done
 
