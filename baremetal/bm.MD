@@ -20,10 +20,10 @@ Updating hosts file
 ```
 
 ```
-sudo curl -L -o /etc/yum.repos.d/base.repo http://pirl-mirror.cisco.com/centos7/base.repo
-sudo curl -L -o /etc/yum.repos.d/updates.repo http://pirl-mirror.cisco.com/centos7/updates.repo
-sudo curl -L -o /etc/yum.repos.d/extras.repo http://pirl-mirror.cisco.com/centos7/extras.repo
-sudo curl -L -o /etc/yum.repos.d/centosplus.repo http://pirl-mirror.cisco.com/centos7/centosplus.repo
+sudo curl -L -o /etc/yum.repos.d/base.repo http://10.60.17.190/centos7/base.repo
+sudo curl -L -o /etc/yum.repos.d/updates.repo http://10.60.17.190/centos7/updates.repo
+sudo curl -L -o /etc/yum.repos.d/extras.repo http://10.60.17.190/centos7/extras.repo
+sudo curl -L -o /etc/yum.repos.d/centosplus.repo http://10.60.17.190/centos7/centosplus.repo
 ```
 A general recommendation is to work with a terminal multiplexer such as screen or tmux.
 ```
@@ -135,7 +135,7 @@ openstack overcloud image build --all
 Second we create the pnda image
 * Ubuntu Mirror _(LAB ONLY)_
 ```
-export DIB_DISTRIBUTION_MIRROR="http://pirl-mirror.cisco.com/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu"
+export DIB_DISTRIBUTION_MIRROR="http://10.60.17.190/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu"
 ```
 
 ```
