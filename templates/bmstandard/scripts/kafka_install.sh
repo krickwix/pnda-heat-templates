@@ -41,11 +41,13 @@ service salt-minion restart
 
 apt-get -y install xfsprogs
 
-if [ -b $volume_dev$ ]; then
-  umount $volume_dev$ || echo 'not mounted'
-  mkfs.xfs $volume_dev$
-  mkdir -p /var/log/pnda
-  cat >> /etc/fstab <<EOF
-  $volume_dev$  /var/log/pnda xfs defaults  0 0
-EOF
-fi
+#mkdir -p /var/log/pnda
+#if [ -b "/dev/sdb" ]; then
+  #umount /dev/sdb || echo "not mounted"
+  #mkfs.xfs -f /dev/sdb
+  #cat >> /etc/fstab <<EOF
+  #/dev/sdb  /var/log/pnda xfs defaults  0 0
+  #EOF
+#fi
+#cat /etc/fstab
+#mount -a
