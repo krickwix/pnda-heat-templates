@@ -378,5 +378,5 @@ sudo pip install jinja2 --upgrade
 Create the stack
 ```
 cd cli
-./heat_cli.py -e barepnda -f femto -b PNDA-2271 -s default -bare true create
+./heat_cli.py -e barepnda -f pico -b PNDA-2271 -s default -bare true create
 ```
