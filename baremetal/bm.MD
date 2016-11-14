@@ -253,9 +253,8 @@ ssh-copy-id 192.168.122.1
 
 ```
 cd
-git clone https://github.com/krickwix/pnda-heat-templates.git
+git clone -b pnda-training https://github.com/krickwix/pnda-heat-templates.git
 cd pnda-heat-templates
-git checkout PNDA-2271
 cd
 ```
 
@@ -361,7 +360,7 @@ parameter_defaults:
   pnda_archive_container:  'pnda_archive'
   packages_server_uri: 'http://173.39.246.113/'
   platform_git_repo_uri: 'https://github.com/krickwix/platform-salt.git'
-  GitBranch: PNDA-2271
+  GitBranch: pnda-training
   git_private_key_file: deploy
   NtpServers: 'ntp.esl.cisco.com'
   signal_transport: TEMP_URL_SIGNAL
