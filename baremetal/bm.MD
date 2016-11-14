@@ -343,3 +343,8 @@ Create the stack
 cd cli
 ./heat_cli.py -e barepnda -f pico -b PNDA-2271 -s default -bare true create
 ```
+
+Updating the undercloud ```/etc/hosts``` file
+```
+openstack server list -c Networks -c Name | grep -v Networks|awk {'print $4,$2'}|cut -d\= -f2 - |sudo tee -a /etc/hosts
+```
