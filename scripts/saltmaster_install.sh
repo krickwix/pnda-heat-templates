@@ -64,7 +64,7 @@ mkdir -p /srv/salt
 cd /srv/salt
 
 if [ "x$platform_git_repo_uri$" != "x" ]; then
-  git clone --branch $git_branch$ $platform_git_repo_uri$
+  git clone --branch $git_branch$ $platform_git_repo_uri$ platform-salt
 elif [ "x$platform_uri$" != "x" ] ; then
   mkdir -p /srv/salt/platform-salt && cd /srv/salt/platform-salt && \
   wget -q -O - $platform_uri$ | tar -zvxf - --strip=1 && ls -al && \
