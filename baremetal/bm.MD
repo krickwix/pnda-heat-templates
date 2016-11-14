@@ -253,9 +253,8 @@ ssh-copy-id 192.168.122.1
 
 ```
 cd
-git clone https://github.com/krickwix/pnda-heat-templates.git
+git clone https://cto-github.cisco.com/CTAO-Team6-Analytics/ngena-heat-templates.git pnda-heat-templates
 cd pnda-heat-templates
-git checkout PNDA-2271
 cd
 ```
 
@@ -339,6 +338,7 @@ Observe the results of introspection
 Setting up the environment file
 ```
 cd ~/pnda-heat-templates
+cp ~/.ssh/id_rsa deploy
 cat > pnda_env.yaml <<EOF
 parameter_defaults:
   public_net: 5982b761-802a-4af3-9c0b-c3b457559179
@@ -360,8 +360,8 @@ parameter_defaults:
   pnda_apps_folder:  'releases'
   pnda_archive_container:  'pnda_archive'
   packages_server_uri: 'http://173.39.246.113/'
-  platform_git_repo_uri: 'https://github.com/krickwix/platform-salt.git'
-  GitBranch: PNDA-2271
+  platform_git_repo_uri: 'git@cto-github.cisco.com:CTAO-Team6-Analytics/ngena-platform-salt.git'
+  GitBranch: master
   git_private_key_file: deploy
   NtpServers: 'ntp.esl.cisco.com'
   signal_transport: TEMP_URL_SIGNAL
@@ -378,5 +378,5 @@ sudo pip install jinja2 --upgrade
 Create the stack
 ```
 cd cli
-./heat_cli.py -e barepnda -f pico -b PNDA-2271 -s default -bare true create
+./heat_cli.py -e barepnda -f pico -b master -s default -bare true create
 ```
