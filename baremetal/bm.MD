@@ -380,3 +380,8 @@ Create the stack
 cd cli
 ./heat_cli.py -e barepnda -f pico -b PNDA-2271 -s default -bare true create
 ```
+
+Adding the node names to the hosts file
+```
+openstack server list -c Name -c Networks|grep -v Networks|awk '{print $4,$2}' | cut -d \= -f 2 | sudo tee -a /etc/hosts
+```
