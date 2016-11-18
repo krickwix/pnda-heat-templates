@@ -16,7 +16,7 @@ sudo hostnamectl set-hostname --transient <undercloud_fqdn>
 ```
 Updating hosts file
 ```
-127.0.0.1   <undercloud_fqdn> <hostname> localhost
+127.0.0.1   <undercloud_hostname> <undercloud_fqdn> localhost
 ```
 
 ```
@@ -72,7 +72,7 @@ store_events = false
 [auth]
 EOF
 ```
-Edit the ```undercloud.conf``` file to replace the ```<undercloud_fqdn>``` and the ```<provisioning_interface>``` fields. The provisioning interface is preferably the unnumbered one.
+Edit the ```undercloud.conf``` file to replace the ```<undercloud_fqdn>``` and the ```<provisioning_interface>``` fields. The provisioning interface is the unnumbered one, ```ip a``` can be used to figure out which one.
 ```
 ip a
 vi ~/undercloud.conf
@@ -186,39 +186,6 @@ In the same spirit, we can setup a known root password using virt-customize.
 ```
 virt-customize -a images/pnda-image.qcow2 --root-password password:cisco
 ```
-Customizing the image to use the ubuntu mirror _(LAB ONLY)_
-```
-guestfish -a ~/images/pnda-image.qcow2
-
-Welcome to guestfish, the guest filesystem shell for
-editing virtual machine filesystems and disk images.
-
-Type: 'help' for help on commands
-      'man' to read the manual
-      'quit' to quit the shell
-
-><fs> run
- 100% ⟦▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒⟧ 00:00
-><fs> list-filesystems
-/dev/sda: ext4
-><fs> mount /dev/sda /
-><fs> vi /etc/cloud/cloud.cfg
-```
-Set the following in the ```cloud.cfg``` file under the ```package_mirrors:```
-```
-         primary:
-           - http://pirl-mirror.cisco.com/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu/
-           - http://%(ec2_region)s.ec2.archive.ubuntu.com/ubuntu/
-           - http://%(availability_zone)s.clouds.archive.ubuntu.com/ubuntu/
-           - http://%(region)s.clouds.archive.ubuntu.com/ubuntu/
-         security:
-           - http://pirl-mirror.cisco.com/ubuntu/trusty/mirror/archive.ubuntu.com/ubuntu/
-```
-End guestfish
-```
-><fs> umount /dev/sda
-><fs> quit
-```
 
 Uploading the previously created/customized images into the undercloud's glance.
 ```
@@ -250,14 +217,18 @@ sudo systemctl enable libvirtd
 sudo systemctl start libvirtd
 ssh-copy-id 192.168.122.1
 ```
-
+Retrieving the pnda heat templates repository
 ```
 cd
+<<<<<<< HEAD
 git clone https://cto-github.cisco.com/CTAO-Team6-Analytics/ngena-heat-templates.git pnda-heat-templates
+=======
+git clone -b pnda-training https://github.com/krickwix/pnda-heat-templates.git
+>>>>>>> 35535a62ffea1bc0df26a8d22eceee3a76382469
 cd pnda-heat-templates
 cd
 ```
-
+Creating and setting up the virtual resources
 ```
 sudo -i
 cd /var/lib/libvirt/images
@@ -269,11 +240,8 @@ openstack baremetal import ~/instackenv.json
 openstack baremetal configure boot
 ~/pnda-heat-templates/baremetal/kvm_helpers/tag_nodes.sh
 ```
-**What happened here:** ```create_vms.sh```
-
 ```
 sudo virsh list --all
-
 ```
 
 ```
@@ -360,8 +328,13 @@ parameter_defaults:
   pnda_apps_folder:  'releases'
   pnda_archive_container:  'pnda_archive'
   packages_server_uri: 'http://173.39.246.113/'
+<<<<<<< HEAD
   platform_git_repo_uri: 'git@cto-github.cisco.com:CTAO-Team6-Analytics/ngena-platform-salt.git'
   GitBranch: master
+=======
+  platform_git_repo_uri: 'https://github.com/krickwix/platform-salt.git'
+  GitBranch: pnda-training
+>>>>>>> 35535a62ffea1bc0df26a8d22eceee3a76382469
   git_private_key_file: deploy
   NtpServers: 'ntp.esl.cisco.com'
   signal_transport: TEMP_URL_SIGNAL
@@ -379,4 +352,9 @@ Create the stack
 ```
 cd cli
 ./heat_cli.py -e barepnda -f pico -b master -s default -bare true create
+```
+
+Updating the undercloud ```/etc/hosts``` file
+```
+openstack server list -c Networks -c Name | grep -v Networks|awk {'print $4,$2'}|cut -d\= -f2 - |sudo tee -a /etc/hosts
 ```
