@@ -220,11 +220,7 @@ ssh-copy-id 192.168.122.1
 Retrieving the pnda heat templates repository
 ```
 cd
-<<<<<<< HEAD
 git clone https://cto-github.cisco.com/CTAO-Team6-Analytics/ngena-heat-templates.git pnda-heat-templates
-=======
-git clone -b pnda-training https://github.com/krickwix/pnda-heat-templates.git
->>>>>>> 35535a62ffea1bc0df26a8d22eceee3a76382469
 cd pnda-heat-templates
 cd
 ```
@@ -328,13 +324,8 @@ parameter_defaults:
   pnda_apps_folder:  'releases'
   pnda_archive_container:  'pnda_archive'
   packages_server_uri: 'http://173.39.246.113/'
-<<<<<<< HEAD
   platform_git_repo_uri: 'git@cto-github.cisco.com:CTAO-Team6-Analytics/ngena-platform-salt.git'
   GitBranch: master
-=======
-  platform_git_repo_uri: 'https://github.com/krickwix/platform-salt.git'
-  GitBranch: pnda-training
->>>>>>> 35535a62ffea1bc0df26a8d22eceee3a76382469
   git_private_key_file: deploy
   NtpServers: 'ntp.esl.cisco.com'
   signal_transport: TEMP_URL_SIGNAL
