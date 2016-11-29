@@ -1,0 +1,38 @@
+[
+    {
+        "description": "Assign profile for object storage",
+        "conditions": [
+            {"op": "eq", "field": "extra.disk.sdb.size", "value": 5994}
+        ],
+        "actions": [
+            {"action": "set-capability", "name": "profile", "value": "s1.medium"}
+        ]
+    },
+    {
+        "description": "Assign profile for object storage",
+        "conditions": [
+            {"op": "eq", "field": "extra.disk.sdb.size", "value": 11989}
+        ],
+        "actions": [
+            {"action": "set-capability", "name": "profile", "value": "s1.large"}
+        ]
+    },
+    {
+        "description": "Assign profile for object storage",
+        "conditions": [
+            {"op": "eq", "field": "extra.disk.sdb.size", "value": 477}
+        ],
+        "actions": [
+            {"action": "set-capability", "name": "profile", "value": "s1.small"}
+        ]
+    },
+    {
+        "description": "Assign profile for object storage",
+        "conditions": [
+            {"op": "eq", "field": "local_gb", "value": 9}
+        ],
+        "actions": [
+            {"action": "set-capability", "name": "profile", "value": "master"}
+        ]
+    }
+]
