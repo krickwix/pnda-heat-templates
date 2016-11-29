@@ -82,7 +82,7 @@ resources:
 {%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
 {%endif%}
-            $roles$: 'cloudera_edge,mysql_connector,console_frontend,console_backend_data_logger,console_backend_data_manager,graphite,gobblin,deployment_manager,package_repository,data_service,impala-shell,yarn-gateway,hbase_opentsdb_tables,hdfs_cleaner,master_dataset,jupyter,kafka_manager,,elk,logserver,opentsdb,grafana,kibana_dashboard,platform_testing_general'
+            $roles$: 'cloudera_edge,mysql_connector,console_frontend,console_backend_data_logger,console_backend_data_manager,graphite,gobblin,deployment_manager,package_repository,data_service,impala-shell,yarn-gateway,hbase_opentsdb_tables,hdfs_cleaner,master_dataset,jupyter,kafka_manager,elk,logserver,opentsdb,grafana,kibana_dashboard,platform_testing_general'
             $cloudera_role$: 'EDGE'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
