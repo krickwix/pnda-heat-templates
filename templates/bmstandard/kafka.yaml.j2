@@ -62,7 +62,7 @@ resources:
       group: script
       config:
         str_replace:
-          template: {get_file: scripts/kafka_install.sh }
+          template: {get_file: scripts/base_install.sh }
           params:
             $flavor$: { get_param: pnda_flavor }
             $master_ip$: { get_param: SaltmasterIP }
@@ -71,7 +71,7 @@ resources:
 {%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
 {%endif%}
-            $roles$: 'kafka'
+            $roles$: 'kafka,zookeeper'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
 {%if create_volumes is equalto 1 %}
