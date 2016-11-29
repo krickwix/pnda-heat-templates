@@ -175,8 +175,7 @@ resources:
   zookeeper:
     type: OS::Heat::ResourceGroup
     properties:
-      #count: { get_param: ZookeeperNodes }
-      count: 1
+      count: { get_param: ZookeeperNodes }
       resource_def:
         type: OS::Pnda::zookeeper
         properties:
