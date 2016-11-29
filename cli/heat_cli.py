@@ -221,11 +221,11 @@ def create_cluster(args):
         if datanodes == None:
             datanodes = 3
         if tsdbnodes == None:
-            tsdbnodes = 1
+            tsdbnodes = 0
         if kafkanodes == None:
-            kafkanodes = 2
+            kafkanodes = 3
         if zknodes == None:
-            zknodes = 3
+            zknodes = 0
     elif (flavor == 'pico') or (flavor == 'femto'):
         if datanodes == None:
             datanodes = 1
