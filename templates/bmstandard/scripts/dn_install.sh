@@ -43,17 +43,18 @@ service salt-minion restart
 
 apt-get -y install xfsprogs
 
-j = 0
+j=0
 for i in {a..e}; do
-  if [ -b "/dev/sdb" ]; then
-    umount /dev/sdb || echo "not mounted"
-    mkfs.xfs -f /dev/sd$i
-    mkdir -p /data$j
-    cat >> /etc/fstab <<EOF
+if [ -b "/dev/sdb" ]; then
+umount /dev/sdb || echo "not mounted"
+mkfs.xfs -f /dev/sd$i
+mkdir -p /data$j
+cat >> /etc/fstab <<EOF
 /dev/sd$i  /data$j xfs defaults  0 0
 EOF
-    j = `expr j + 1`
+j=`expr $j + 1`
 fi
+done
 
 cat /etc/fstab
 mount -a
