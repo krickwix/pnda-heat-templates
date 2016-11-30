@@ -82,7 +82,7 @@ resources:
 {%if create_volumes is equalto 1 %}
             $volume_dev$: { get_param: log_mountpoint }
 {%endif%}
-            $roles$: 'cloudera_edge,cloudera_manager,platform_testing_cdh,mysql_connector,cloudera_namenode,mysql_connector,jupyter,opentsdb,impala-shell,yarn-gateway,hbase_opentsdb_tables,hdfs_cleaner,gobblin'
+            $roles$: 'cloudera_manager,platform_testing_cdh,mysql_connector,cloudera_namenode,mysql_connector'
             $cloudera_role$: 'CM'
   install_deployment:
     type: OS::Heat::SoftwareDeployment
