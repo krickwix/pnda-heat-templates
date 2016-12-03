@@ -2,6 +2,7 @@
 
 set -e
 
+export ROLES="$roles$"
 
 cat >> /etc/hosts <<EOF
 $master_ip$ saltmaster salt
@@ -27,15 +28,9 @@ cloudera:
 EOF
 fi
 
-if [ "x$brokerid$" != "x$" ]; then
-  cat >> /etc/salt/grains <<EOF
-broker_id: $brokerid$
-EOF
-fi
-
-if [ "x$roles$" != "x$" ]; then
+if [ "x${ROLES}" != "x" ]; then
 cat >> /etc/salt/grains <<EOF
-roles: [${roles}]
+roles: [${ROLES}]
 EOF
 fi
 

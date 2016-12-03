@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
 set -e
-export roles="$roles$"
+export ROLES="$roles$"
 
 cat >> /etc/hosts <<EOF
 $master_ip$ saltmaster salt
@@ -14,33 +14,28 @@ hostname=`hostname` && echo "id: $hostname" > /etc/salt/minion && unset hostname
 echo "log_level: debug" >> /etc/salt/minion
 echo "log_level_logfile: debug" >> /etc/salt/minion
 
-if [ "x$brokerid$" == "x0" ] || [ "x$brokerid$" == "x1" ]; then
-  roles="$roles zookeeper"
-fi
-
-a="roles:\n";for i in $roles; do a="$a  - $i\n";done;echo $a
 cat > /etc/salt/grains <<EOF
 pnda:
   flavor: $flavor$
 pnda_cluster: $pnda_cluster$
 EOF
 
-if [ "x$brokerid$" != "x$" ]; then
+if [ "x$cloudera_role$" != "x$" ]; then
   cat >> /etc/salt/grains <<EOF
-broker_id: $brokerid$
+cloudera:
+  role: $cloudera_role$
 EOF
 fi
 
-if [ "x$roles$" != "x$" ]; then
+if [ "x${ROLES}" != "x" ]; then
 cat >> /etc/salt/grains <<EOF
-`printf "%b" "$a"`
+roles: [${ROLES}]
 EOF
 fi
 
 service salt-minion restart
 
 apt-get -y install xfsprogs
-
 mkdir -p /var/lib/elasticsearch/data
 if [ -b "/dev/sdb" ]; then
 umount /dev/sdb || echo "not mounted"
