@@ -208,7 +208,7 @@ def create_cluster(args):
         fs_type = args.fstype
     print 'Deploying Flavor {}'.format(flavor)
 
-    elif flavor == 'bmstandard':
+    if flavor == 'bmstandard':
         if datanodes == None:
             datanodes = 3
         if tsdbnodes == None:
