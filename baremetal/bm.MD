@@ -204,14 +204,14 @@ glance image-update --property kernel_id=$pnda_kernel_id pnda-image
 
 ```
 sudo yum -y install libvirt virt-install
-cat << EOF > /etc/polkit-1/localauthority/50-local.d/50-libvirt-user-stack.pkla
+sudo bash -c 'cat << EOF > /etc/polkit-1/localauthority/50-local.d/50-libvirt-user-stack.pkla
 [libvirt Management Access]
 Identity=unix-user:stack
 Action=org.libvirt.unix.manage
 ResultAny=yes
 ResultInactive=yes
 ResultActive=yes
-EOF
+EOF'
 sudo usermod -aG libvirt stack
 sudo systemctl enable libvirtd
 sudo systemctl start libvirtd
